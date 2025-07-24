@@ -1,0 +1,184 @@
+/* General page styles */
+.page {
+  min-height: 100vh;
+  background: #111;
+  color: #fff;
+  padding-bottom: 6.5rem;
+  box-sizing: border-box;
+  font-family: 'Inter', Arial, sans-serif;
+  width: 100vw;
+  max-width: 100vw;
+}
+
+/* Home Page */
+.spending-card {
+  background: #232323;
+  border-radius: 1.2rem;
+  margin: 1.2rem 0.6rem 1.1rem 0.6rem;
+  padding: 1.1rem 0.7rem 1.2rem 0.7rem;
+  box-shadow: 0 2px 12px #0003;
+}
+.spending-title {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 1.1rem;
+  color: #eaeaea;
+}
+.spending-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.summary-card {
+  background: #191919;
+  border-radius: 1rem;
+  padding: 1.1rem 0.7rem 0.9rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 0.95rem;
+  box-shadow: 0 1px 6px #0002;
+  min-width: 0;
+}
+.summary-label {
+  font-size: 0.93rem;
+  color: #bdbdbd;
+  margin-bottom: 0.3rem;
+}
+.summary-amount {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  line-height: 1.2;
+}
+.summary-range {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+.summary-progress {
+  width: 100%;
+  height: 1.1rem;
+  border-radius: 0.7rem;
+  margin-top: 0.3rem;
+  background: #232323;
+}
+.summary-progress.green {
+  background: conic-gradient(#1ed760 0 75%, #232323 75% 100%);
+}
+.summary-progress.red {
+  background: conic-gradient(#ff3c3c 0 75%, #232323 75% 100%);
+}
+
+.receipts-card {
+  background: #191919;
+  border-radius: 1.1rem;
+  margin: 0.7rem 0.6rem 1.1rem 0.6rem;
+  padding: 1rem 0.7rem 0.7rem 0.7rem;
+}
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin-bottom: 0.7rem;
+  color: #fff;
+}
+.view-all {
+  color: #bdbdbd;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.receipts-list {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 0.5rem;
+}
+.receipt-img {
+  width: 3.2rem;
+  height: 3.2rem;
+  background: #232323;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.receipt-x {
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 2px solid #bdbdbd;
+  border-radius: 0.2rem;
+  background: repeating-linear-gradient(135deg, #232323 0 2px, #bdbdbd 2px 4px);
+}
+.receipts-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.1rem;
+  gap: 0.2rem;
+}
+.receipt-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 0.1rem;
+}
+.receipt-label.red {
+  color: #ff3c3c;
+}
+.receipt-label.green {
+  color: #1ed760;
+}
+
+.chat-card {
+  background: #191919;
+  border-radius: 1.1rem;
+  margin: 0.7rem 0.6rem 1.1rem 0.6rem;
+  padding: 1rem 0.7rem 0.7rem 0.7rem;
+}
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.chat-item {
+  background: #232323;
+  border-radius: 0.7rem;
+  padding: 0.7rem 0.8rem 0.7rem 0.8rem;
+  font-size: 0.98rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.chat-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 1.01rem;
+  margin-bottom: 0.1rem;
+}
+.chat-title {
+  color: #fff;
+}
+.chat-icon {
+  color: #bdbdbd;
+  font-size: 1.1rem;
+  margin-left: 0.3rem;
+}
+.chat-msg {
+  color: #bdbdbd;
+  font-size: 0.93rem;
+  line-height: 1.3;
+}
+
+/* Responsive tweaks */
+@media (min-width: 480px) {
+  .spending-card, .receipts-card, .chat-card {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 420px;
+  }
+  .bottom-nav-mobile {
+    max-width: 420px;
+  }
+} 
