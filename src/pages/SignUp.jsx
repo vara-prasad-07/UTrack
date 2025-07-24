@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import CustomSpinner from '../components/CustomSpinner';
 
 const Signup = () => {
+  const navigate=useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState('');
+  const [loading, setLoading] = useState(false);
+  
 
   const handleSignup = () => {
+    setLoading(true);
     console.log('Signup attempted with:', { 
       email, 
       password, 
@@ -15,6 +21,11 @@ const Signup = () => {
       dateOfBirth, 
       gender 
     });
+    setTimeout(()=>{
+        navigate('/setup');
+    },5000);
+    
+    
   };
 
   const handleGoogleSignup = () => {
@@ -22,11 +33,13 @@ const Signup = () => {
   };
 
   const handleLogin = () => {
-    console.log('Login clicked');
+    navigate('/login');
   };
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center py-4" style={{backgroundColor: '#000'}}>
+    
+    <div className="min-vh-100 d-flex align-items-center justify-content-center " style={{backgroundColor: '#000'}}>
+        
       <div className="container-fluid px-3">
         <div className="row justify-content-center">
         <div className="flex items-center justify-start p-6 pt-12">
@@ -37,11 +50,10 @@ const Signup = () => {
           <span className="text-xl text-white font-semibold">UTrack</span>
         </div>
       </div>
+      {loading && <CustomSpinner />}
           <div className="col-12" style={{maxWidth: '400px'}}>
             
-            {/* Header with Logo */}
-            
-
+    
             {/* Signup Card */}
             <div className="card border-0 shadow-lg" style={{borderRadius: '20px'}}>
               <div className="card-body p-4">

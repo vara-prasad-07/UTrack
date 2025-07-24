@@ -9,6 +9,7 @@ import You from './pages/You.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 import Login from './pages/Login.jsx';
 import SignUp from './pages/SignUp.jsx';
+import SetUp from './pages/SetUp.jsx';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
+      <Route path="/setup" element={<SetUp />} />
     </Routes>
   )
 }
