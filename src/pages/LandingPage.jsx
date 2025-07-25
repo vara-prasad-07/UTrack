@@ -131,9 +131,24 @@ const renderIllustration = (type) => {
 };
 
 export default function LandingPage() {
+
     const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [videoEnded, setVideoEnded] = useState(false);
+  const isUserLoggedIn = JSON.parse(localStorage.getItem("user"))["uid"]!==null;
+  
+  const handleVideoEnd = () => {
+    setVideoEnded(true);
+  };
 
+  useEffect(() => {
+    if (videoEnded) {
+      if (isUserLoggedIn) {
+        navigate("/dashboard"); // redirect AFTER video finishes
+      }
+      // else do nothing → show landing content
+    }
+  }, [videoEnded, isUserLoggedIn, navigate]);
   // Auto-advance carousel every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
@@ -156,7 +171,36 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="w-screen h-screen overflow-hidden bg-black text-white flex flex-col">
+    <>
+    {!videoEnded ? (
+      <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "black",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 9999,
+      }}
+    >
+      <video
+        src="https://res.cloudinary.com/diryolcmm/video/upload/v1753462614/UTrack_1_b3bzav.mp4"
+        autoPlay
+        muted
+        onEnded={handleVideoEnd}
+        style={{
+          maxWidth: "100%",
+          maxHeight: "100%",
+          objectFit: "contain",
+        }}
+      />
+    </div>
+    ) : isUserLoggedIn ? null : (
+      <div className="w-screen h-screen overflow-hidden bg-black text-white flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-start p-6 pt-12">
         <div className="flex items-center space-x-3">
@@ -241,5 +285,8 @@ export default function LandingPage() {
         </div>
       </div>
     </div>
+    )}
+  </>
+    
   );
 }
