@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CustomSpinner from '../components/CustomSpinner'
+import {db} from '../firebase'
+import { doc, updateDoc } from "firebase/firestore";
 
 const SetupGuide = () => {
   const navigate=useNavigate();  
@@ -30,7 +32,7 @@ const SetupGuide = () => {
     setCurrentStep(2);
   };
 
-  const handleStep2Next = () => {
+  const handleStep2Next = async() => {
     const budget = parseFloat(monthlyBudget);
     if (!monthlyBudget || budget <= 0) {
       setBudgetError('Please enter a valid amount greater than 0');
@@ -38,9 +40,11 @@ const SetupGuide = () => {
     }
     setBudgetError('');
     setLoading(true)
-    setTimeout(()=>{
-      navigate('/dashboard');
-    },5000)
+    const uid=JSON.parse(localStorage.getItem("user"))["uid"];
+    const user_settings={ "usersettings":  {"currency":selectedCurrency,"montly_budget":budget}}
+    await updateDoc(doc(db, "users", uid), user_settings);
+    setLoading(false)
+    navigate('/dashboard');
   };
 
   const handleBudgetChange = (e) => {

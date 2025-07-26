@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomSpinner from '../components/CustomSpinner';
 import GoogleLoginButton from '../components/GoogleLoginButton'
-import {auth} from '../firebase'
+import {auth,db} from '../firebase'
 import {createUserWithEmailAndPassword} from 'firebase/auth';
-
+import { doc, setDoc } from "firebase/firestore";
 const Signup = () =>{
   const navigate=useNavigate();
+  const [name,setName]=useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -16,7 +17,7 @@ const Signup = () =>{
   
 
   const handleSignup = async() => {
-    if(email==='' || password==='' || confirmPassword==='' || dateOfBirth==='' || gender===''){
+    if(email==='' || password==='' || confirmPassword==='' || dateOfBirth==='' || gender==='' || name===''){
       alert("Enter vaild details");
       return;
     }
@@ -30,7 +31,11 @@ const Signup = () =>{
          const userCredentials=await createUserWithEmailAndPassword(auth,email,password);
          setLoading(false);
          const user=userCredentials.user;
-         console.log(user);
+         const uid=user.uid;
+         const user_details={"userdetails":{"name":name,"email":email,"dob":dateOfBirth,"gender":gender}}
+         await setDoc(doc(db, "users", uid), user_details);
+         console.log("db update with userdetails");
+         
          localStorage.setItem("user",JSON.stringify(user));
          navigate('/setup');
 
@@ -80,7 +85,25 @@ const Signup = () =>{
                 <h3 className="text-center mb-4" style={{fontSize: '32px', fontWeight: '600', color: '#333'}}>
                   Signup
                 </h3>
-
+                <div className="mb-3">
+                  <div className="form-label mb-2" style={{fontSize: '16px', color: '#666', fontWeight: '500'}}>
+                    Full Name
+                  </div>
+                  <input
+                    type="name"
+                    className="form-control"
+                    placeholder="Enter your Full Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    style={{
+                      height: '50px',
+                      fontSize: '16px',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      backgroundColor: '#f8f9fa'
+                    }}
+                  />
+                </div>
                 {/* Email Field */}
                 <div className="mb-3">
                   <div className="form-label mb-2" style={{fontSize: '16px', color: '#666', fontWeight: '500'}}>

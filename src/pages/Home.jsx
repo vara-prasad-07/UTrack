@@ -1,6 +1,10 @@
 import React from 'react';
 import BottomNav from '../components/BottomNav';
 import './PageStyles.css';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase'; 
+import { getAuth } from 'firebase/auth';
+import { useEffect, useState } from 'react';
 
 const CircularProgress = ({ percentage, color }) => {
   const radius = 18;
@@ -61,7 +65,7 @@ const ReceiptItem = ({ amount, type }) => (
   </div>
 );
 
-const ChatItem = ({ title, description, icon }) => (
+const ChatItem = ({ title, description}) => (
   <div className="bg-gray-800 p-4 rounded-lg mb-3">
     <div className="flex items-start justify-between">
       <div className="flex-1">
@@ -80,32 +84,75 @@ const ChatItem = ({ title, description, icon }) => (
 
 const Home = () => {
   const percentages = [20, 30, 40,80];
+  const [userData, setUserData] = useState(null);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const auth = getAuth();
+      const user = JSON.parse(localStorage.getItem("user"))['uid'];
+      
+      
+
+      if (!user) {
+        console.log("No user logged in");
+        return;
+      }
+
+      try {
+        const userRef = doc(db, 'users', user);
+        const docSnap = await getDoc(userRef);
+
+        if (docSnap.exists()) {
+          setUserData(docSnap.data());
+          console.log("retrived successfully")
+        } else {
+          console.log("No user data found in Firestore");
+        }
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+  const budget=userData?.usersettings?.montly_budget
+  const budgetObject={
+    month:budget,
+    week:(budget)/4,
+    day:(budget)/30
+  }
+  
+  const data = {
+    month: { spent: 12000, budget: budget, percentage: 80 },
+    week: { spent: 3000, budget: (budget)/4, percentage: 75 },
+    day: { spent: 500, budget: (budget)/30, percentage: 50 },
+    overall:{spent:12000,budget:budget,percentage:90}
+  };
+  console.log(budgetObject)
   return (
     <div>
       <div className="min-h-screen bg-black text-white">
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-lg font-medium">Track your spending's, Vara!</h1>
+          <h1 className="text-lg font-medium">Track your spending's,{userData?.userdetails?.name}</h1>
         </div>
 
         {/* Spending Overview */}
         <div className="mb-8">
-      <div className="flex flex-wrap gap-4">
-        {percentages.map((p, index) => (
-          <SpendingCard
-            key={index}
-            title="This Month "
-            spent="12000/-"
-            budget="15000/-"
-            color="#10B981"
-            percentage={p}
-          />
-        ))}
-      </div>
-    </div>
-
+  <div className="flex flex-wrap gap-4">
+    {Object.entries(data).map(([key, values], index) => (
+      <SpendingCard
+        key={index}
+        title={`This ${key.charAt(0).toUpperCase() + key.slice(1)}`}
+        spent={`${values.spent}/-`}
+        budget={`${values.budget}/-`}
+        color="#10B981"
+        percentage={values.percentage}
+      />
+    ))}
+  </div>
+</div>
         {/* Recent Receipts */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -134,17 +181,17 @@ const Home = () => {
             <ChatItem
               title="Food & Delivery"
               description="You spent ₹2,350 on food delivery this week 🍕 — that's 15% more than last week. Want to set a weekly limit?"
-              icon="refresh"
+              
             />
             <ChatItem
               title="Travel Expenses"
               description="₹6,100 went into fuel and cab rides this month 🚗. You've been traveling more than usual. Shall I suggest budget tips?"
-              icon="refresh"
+              
             />
             <ChatItem
               title="Subscriptions"
               description="You spent ₹1,250 in subscriptions this month 💳 — Netflix, Spotify, and 3 others. Want a reminder before they renew?"
-              icon="refresh"
+              
             />
           </div>
         </div>
@@ -152,10 +199,6 @@ const Home = () => {
     </div>
 
       <BottomNav />
-      <link
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
-        rel="stylesheet"
-      />
     </div>
   );
 };

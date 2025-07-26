@@ -135,7 +135,7 @@ export default function LandingPage() {
     const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [videoEnded, setVideoEnded] = useState(false);
-  const isUserLoggedIn = JSON.parse(localStorage.getItem("user"))!==null;
+  const isUserLoggedIn = JSON.parse(localStorage.getItem("user"))!==null ;
   
   const handleVideoEnd = () => {
     setVideoEnded(true);

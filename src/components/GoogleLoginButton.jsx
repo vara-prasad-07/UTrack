@@ -12,6 +12,7 @@ function GoogleLoginButton() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const additionalDetails=getAdditionalUserInfo(result);
+      localStorage.setItem("user",JSON.stringify(user))
       const isnewuser=additionalDetails.isNewUser;
       isnewuser? navigate('/setup'):navigate('/dashboard')
 
