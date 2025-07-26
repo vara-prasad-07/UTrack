@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import {auth} from '../firebase';
+import { onAuthStateChanged } from "firebase/auth";
 
 const carouselData = [
   {
@@ -135,8 +136,15 @@ export default function LandingPage() {
     const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [videoEnded, setVideoEnded] = useState(false);
-  const isUserLoggedIn = JSON.parse(localStorage.getItem("user"))!==null ;
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsUserLoggedIn(!!user); // true if user exists
+    });
+  
+    return () => unsubscribe(); // cleanup on unmount
+  }, []);
   const handleVideoEnd = () => {
     setVideoEnded(true);
   };
