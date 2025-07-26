@@ -9,7 +9,9 @@
   width: 100vw;
   max-width: 100vw;
 }
-
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
 /* Home Page */
 .spending-card {
   background: #232323;
