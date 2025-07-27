@@ -1,12 +1,14 @@
 import React, { useState, useRef } from 'react';
 import BottomNav from '../components/BottomNav';
 import './PageStyles.css';
+import CustomSpinner from '../components/CustomSpinner';
 
 const Scan = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
+  const [loading,setLoading]=useState(false);
 
   // Handle file upload from device storage
   const handleFileUpload = (event) => {
@@ -49,7 +51,12 @@ const Scan = () => {
     setCapturedImage(null);
     setIsCapturing(false);
   };
-
+  const handleResult=()=>{
+     setLoading(true);
+     setTimeout(()=>{
+      setLoading(false);
+     },2000)
+  }
   return (
     <div className="page scan-page">
       {!capturedImage ? (
@@ -98,6 +105,7 @@ const Scan = () => {
       ) : (
         /* Display captured/uploaded image */
         <div className="image-preview-container">
+          {loading && <CustomSpinner/>}
           <div className="image-preview-header">
             <button className="back-button" onClick={resetScan}>
               ← Back
@@ -111,7 +119,7 @@ const Scan = () => {
             <button className="action-button secondary" onClick={resetScan}>
               Scan Again
             </button>
-            <button className="action-button primary">
+            <button className="action-button primary" onClick={handleResult}>
               Process Bill
             </button>
           </div>
@@ -263,15 +271,15 @@ const Scan = () => {
           display: flex;
           justify-content: center;
           align-items: center;
-          margin-bottom: 20px;
+          margin-bottom: 5px;
           border-radius: 12px;
           overflow: hidden;
           background-color: #111;
         }
 
         .scanned-image {
-          max-width: 100%;
-          max-height: 60vh;
+          max-width: 60%;
+          max-height: 40vh;
           object-fit: contain;
           border-radius: 8px;
         }
@@ -279,7 +287,8 @@ const Scan = () => {
         .image-actions {
           display: flex;
           gap: 12px;
-          margin-top: 20px;
+          margin-bottom:4rem;
+          margin-top:10px;
         }
 
         .action-button {
