@@ -44,6 +44,7 @@ const SetupGuide = () => {
     onAuthStateChanged(auth, async(user) => {
   if (user) {
     const uid = user.uid;
+    console.log(uid)
     await updateDoc(doc(db, "users", uid), user_settings);
     // ✅ Safe to use uid here
   } else {

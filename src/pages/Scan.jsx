@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import BottomNav from '../components/BottomNav';
 import './PageStyles.css';
 import CustomSpinner from '../components/CustomSpinner';
+import './ScanPage.css'
 
 const Scan = () => {
   const [capturedImage, setCapturedImage] = useState(null);
@@ -9,11 +10,14 @@ const Scan = () => {
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const [loading,setLoading]=useState(false);
+  const [htmlTable, setHtmlTable] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
 
   // Handle file upload from device storage
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
         setCapturedImage(e.target.result);
@@ -26,6 +30,7 @@ const Scan = () => {
   const handleCameraCapture = (event) => {
     const file = event.target.files[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
         setCapturedImage(e.target.result);
@@ -50,13 +55,41 @@ const Scan = () => {
   const resetScan = () => {
     setCapturedImage(null);
     setIsCapturing(false);
+    setHtmlTable(null);
+    setImageFile(null);
   };
-  const handleResult=()=>{
-     setLoading(true);
-     setTimeout(()=>{
+
+  const handleResult = async () => {
+    if (!imageFile) {
+      alert('No image file to process.');
+      return;
+    }
+    setLoading(true);
+    setHtmlTable(null);
+    try {
+      const formData = new FormData();
+      formData.append('bill_image', imageFile);
+      const response = await fetch('https://bill-generator-m5du.onrender.com/process-bill', {
+        method: 'POST',
+        body: formData,
+      });
       setLoading(false);
-     },2000)
-  }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data && data.data) {
+        setHtmlTable(data.data.html_table);
+        console.log('Response JSON:', data.data.json);
+      } else {
+        setHtmlTable('<div style="color:red">No table found in response.</div>');
+      }
+    } catch (error) {
+      setLoading(false);
+      setHtmlTable('<div style="color:red">Error processing bill.</div>');
+      console.error('Error:', error);
+    }
+  };
   return (
     <div className="page scan-page">
       {!capturedImage ? (
@@ -104,237 +137,48 @@ const Scan = () => {
         </div>
       ) : (
         /* Display captured/uploaded image */
-        <div className="image-preview-container">
-          {loading && <CustomSpinner/>}
-          <div className="image-preview-header">
-            <button className="back-button" onClick={resetScan}>
-              ← Back
-            </button>
-            <h2>Scanned Image</h2>
-          </div>
-          <div className="image-preview">
-            <img src={capturedImage} alt="Scanned bill" className="scanned-image" />
-          </div>
-          <div className="image-actions">
-            <button className="action-button secondary" onClick={resetScan}>
-              Scan Again
-            </button>
-            <button className="action-button primary" onClick={handleResult}>
-              Process Bill
-            </button>
-          </div>
-        </div>
+        <>
+          {!htmlTable && (
+            <div className="image-preview-container">
+              {loading && <CustomSpinner/>}
+              <div className="image-preview-header">
+                <button className="back-button" onClick={resetScan}>
+                  ← Back
+                </button>
+                <h2>Scanned Image</h2>
+              </div>
+              <div className="image-preview">
+                <img src={capturedImage} alt="Scanned bill" className="scanned-image" />
+              </div>
+              <div className="image-actions">
+                <button className="action-button secondary" onClick={resetScan}>
+                  Scan Again
+                </button>
+                <button className="action-button primary" onClick={handleResult}>
+                  Process Bill
+                </button>
+              </div>
+            </div>
+          )}
+          {htmlTable && (
+            
+            <div className="html-table-preview" style={{marginTop: '2rem', background: '#222', borderRadius: 8, padding: 16}}>
+              <h2>Your Virtual Bill</h2>
+              <div dangerouslySetInnerHTML={{ __html: htmlTable }} />
+              <div className="image-actions">
+                <button className="action-button secondary" onClick={resetScan}>
+                  Scan Again
+                </button>
+                <button className="action-button primary">
+                  Save
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
       
       <BottomNav />
-
-      <style jsx>{`
-        .scan-page {
-          background-color: #000;
-          color: #fff;
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          padding: 20px;
-          padding-bottom: 80px; /* Space for bottom nav */
-        }
-
-        .scan-upload-container {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          gap: 40px;
-          max-width: 400px;
-          margin: 0 auto;
-        }
-
-        .upload-section {
-          border: 2px dashed #333;
-          border-radius: 12px;
-          padding: 60px 40px;
-          text-align: center;
-          cursor: pointer;
-          transition: border-color 0.3s ease;
-          width: 100%;
-        }
-
-        .upload-section:hover {
-          border-color: #555;
-        }
-
-        .upload-icon {
-          margin-bottom: 20px;
-          color: #fff;
-        }
-
-        .upload-icon svg {
-          transform: rotate(180deg);
-        }
-
-        .upload-title {
-          font-size: 20px;
-          font-weight: 600;
-          margin-bottom: 8px;
-          color: #fff;
-        }
-
-        .upload-subtitle {
-          color: #888;
-          font-size: 14px;
-        }
-
-        .divider-section {
-          position: relative;
-          width: 100%;
-          text-align: center;
-        }
-
-        .divider-text {
-          background-color: #000;
-          padding: 0 20px;
-          color: #888;
-          font-size: 14px;
-          position: relative;
-        }
-
-        .divider-text::before {
-          content: '';
-          position: absolute;
-          top: 50%;
-          left: -150px;
-          right: -150px;
-          height: 1px;
-          background-color: #333;
-          z-index: -1;
-        }
-
-        .camera-button {
-          background-color: #007AFF;
-          border: none;
-          border-radius: 12px;
-          padding: 16px 24px;
-          color: white;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          width: 100%;
-          justify-content: center;
-          transition: background-color 0.3s ease;
-        }
-
-        .camera-button:hover {
-          background-color: #0056CC;
-        }
-
-        .camera-icon {
-          font-size: 20px;
-        }
-
-        .image-preview-container {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          max-width: 500px;
-          margin: 0 auto;
-          width: 100%;
-        }
-
-        .image-preview-header {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          margin-bottom: 20px;
-        }
-
-        .back-button {
-          background: none;
-          border: none;
-          color: #007AFF;
-          font-size: 16px;
-          cursor: pointer;
-          padding: 8px;
-        }
-
-        .image-preview-header h2 {
-          color: #fff;
-          font-size: 20px;
-          font-weight: 600;
-        }
-
-        .image-preview {
-          flex: 1;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          margin-bottom: 5px;
-          border-radius: 12px;
-          overflow: hidden;
-          background-color: #111;
-        }
-
-        .scanned-image {
-          max-width: 60%;
-          max-height: 40vh;
-          object-fit: contain;
-          border-radius: 8px;
-        }
-
-        .image-actions {
-          display: flex;
-          gap: 12px;
-          margin-bottom:4rem;
-          margin-top:10px;
-        }
-
-        .action-button {
-          flex: 1;
-          padding: 16px;
-          border-radius: 12px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          border: none;
-          transition: all 0.3s ease;
-        }
-
-        .action-button.secondary {
-          background-color: #333;
-          color: #fff;
-        }
-
-        .action-button.secondary:hover {
-          background-color: #444;
-        }
-
-        .action-button.primary {
-          background-color: #007AFF;
-          color: #fff;
-        }
-
-        .action-button.primary:hover {
-          background-color: #0056CC;
-        }
-
-        @media (max-width: 480px) {
-          .scan-page {
-            padding: 16px;
-          }
-          
-          .upload-section {
-            padding: 40px 20px;
-          }
-          
-          .divider-text::before {
-            left: -100px;
-            right: -100px;
-          }
-        }
-      `}</style>
     </div>
   );
 };
