@@ -40,7 +40,7 @@ const SetupGuide = () => {
     }
     setBudgetError('');
     setLoading(true)
-    const user_settings={ "usersettings":  {"currency":selectedCurrency,"montly_budget":budget}}
+    const user_settings={ "usersettings":  {"currency":selectedCurrency,"montly_budget":budget},"user_bills":[]}
     onAuthStateChanged(auth, async(user) => {
   if (user) {
     const uid = user.uid;

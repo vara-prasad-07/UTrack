@@ -1,8 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import BottomNav from '../components/BottomNav';
 import './PageStyles.css';
 import CustomSpinner from '../components/CustomSpinner';
 import './ScanPage.css'
+import {auth,db} from '../firebase'
+import { doc, updateDoc,arrayUnion } from "firebase/firestore";
+import { useNavigate} from 'react-router-dom';
 
 const Scan = () => {
   const [capturedImage, setCapturedImage] = useState(null);
@@ -12,7 +15,11 @@ const Scan = () => {
   const [loading,setLoading]=useState(false);
   const [htmlTable, setHtmlTable] = useState(null);
   const [imageFile, setImageFile] = useState(null);
-
+  const [jsonData,setJsonData]=useState(null);
+  const [isBillSaved,setIisBillSaved]=useState(false);
+  const navigate=useNavigate();
+  const uid=auth.currentUser.uid;
+ 
   // Handle file upload from device storage
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -80,7 +87,7 @@ const Scan = () => {
       const data = await response.json();
       if (data && data.data) {
         setHtmlTable(data.data.html_table);
-        console.log('Response JSON:', data.data.json);
+        setJsonData(data.data.json);
       } else {
         setHtmlTable('<div style="color:red">No table found in response.</div>');
       }
@@ -90,6 +97,25 @@ const Scan = () => {
       console.error('Error:', error);
     }
   };
+  const saveBill=async ()=>{
+    
+    try{
+      const userRef=doc(db,"users",uid)
+      setLoading(true);
+      await updateDoc(userRef,{
+        user_bills:arrayUnion(jsonData)
+      })
+      console.log("clicked")
+      setLoading(false)
+      setIisBillSaved(true)
+    }catch(error){
+      console.log("error in updating db",error)
+      setLoading(false)
+    }
+  }
+  const handleBack=()=>{
+    setCapturedImage(false)
+  }
   return (
     <div className="page scan-page">
       {!capturedImage ? (
@@ -138,7 +164,7 @@ const Scan = () => {
       ) : (
         /* Display captured/uploaded image */
         <>
-          {!htmlTable && (
+          {!isBillSaved &&!htmlTable && (
             <div className="image-preview-container">
               {loading && <CustomSpinner/>}
               <div className="image-preview-header">
@@ -160,7 +186,7 @@ const Scan = () => {
               </div>
             </div>
           )}
-          {htmlTable && (
+          {!isBillSaved && htmlTable && (
             
             <div className="html-table-preview" style={{marginTop: '2rem', background: '#222', borderRadius: 8, padding: 16}}>
               <h2>Your Virtual Bill</h2>
@@ -169,9 +195,20 @@ const Scan = () => {
                 <button className="action-button secondary" onClick={resetScan}>
                   Scan Again
                 </button>
-                <button className="action-button primary">
+                <button className="action-button primary" onClick={saveBill}>
                   Save
                 </button>
+              </div>
+            </div>
+          )}
+          {isBillSaved &&(
+            <div className="html-table-preview" style={{marginTop: '2rem', background: '#222', borderRadius: 8, padding: 16}}>
+              <h2>Bill saved</h2>
+              <div className="image-actions">
+                <button className="action-button secondary" onClick={handleBack}>
+                  Back
+                </button>
+                
               </div>
             </div>
           )}
