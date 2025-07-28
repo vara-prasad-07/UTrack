@@ -103,7 +103,7 @@ const Scan = () => {
       const userRef=doc(db,"users",uid)
       setLoading(true);
       await updateDoc(userRef,{
-        user_bills:arrayUnion(jsonData)
+        user_bills:arrayUnion({json:jsonData,html:htmlTable})
       })
       console.log("clicked")
       setLoading(false)

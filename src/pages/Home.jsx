@@ -55,16 +55,16 @@ const SpendingCard = ({ title, spent, budget, color, percentage }) => (
 
 const ReceiptItem = ({ amount, type }) => (
  
-      <div className="bg-gray-700 p-4 rounded-lg flex-1 min-w-[80px] max-w-[100px]">
-        <div className="w-full h-12 bg-gray-600 rounded mb-2 flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-gray-400 rounded"></div>
-        </div>
-        <div className="text-xs text-gray-200 mb-1">
-          <p>You spend</p></div>
-        <div className={`text-sm font-semibold ${type === 'expense' ? 'text-red-400' : 'text-green-400'}`}>
-          {amount.total_amount}
-        </div>
-      </div>
+  <div className="bg-gray-700 p-4 rounded-lg flex flex-col items-center justify-between min-w-[80px] max-w-[100px]">
+  <div className="text-xs text-gray-200 mb-1 whitespace-nowrap">You spend</div>
+  <div className={`text-sm font-semibold mb-2 ${type === 'expense' ? 'text-red-400' : 'text-green-400'}`}>
+    {amount.total_amount}
+  </div>
+  <button className="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600 transition">
+    View
+  </button>
+</div>
+
     
  
 );
@@ -136,6 +136,7 @@ const Home = () => {
   const budget=userData?.usersettings?.montly_budget
 
   const recieptsData=userData?.user_bills!=null;
+  
   const userbill=userData?.user_bills[0]
   
 
@@ -194,7 +195,7 @@ const Home = () => {
           <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
             {Array.isArray(userData?.user_bills) && userData.user_bills.length > 0 ? (
               userData.user_bills.map((bill, index) => (
-                <ReceiptItem key={index} amount={bill} type="expense" />
+                <ReceiptItem key={index} amount={bill["json"]} type="expense" />
               ))
             ) : (
               <div className="bg-gray-800 text-white p-4 rounded-lg text-center shadow-md max-w-xs mx-auto">
