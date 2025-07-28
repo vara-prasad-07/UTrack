@@ -142,9 +142,81 @@ const Home = () => {
   if(recieptsData){
     value=calculateTotalSpending(userData?.user_bills)
   }
+  function parseFlexibleDate(dateStr) {
+  if (!dateStr || typeof dateStr !== 'string') return null;
+
+  // Try ISO first
+  let parsed = new Date(dateStr);
+  if (!isNaN(parsed)) return parsed;
+
+  // Try DD/MM/YYYY HH:mm
+  const slashMatch = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?$/);
+  if (slashMatch) {
+    const [, dd, mm, yyyy, hh = "00", min = "00"] = slashMatch;
+    return new Date(`${yyyy}-${mm}-${dd}T${hh}:${min}:00`);
+  }
+
+  // Try DD-MM-YYYY HH:mm:ss AM/PM
+  const dashMatch = dateStr.match(/^(\d{2})-(\d{2})-(\d{4})\s+(\d{2}):(\d{2}):(\d{2})\s+(AM|PM)$/i);
+  if (dashMatch) {
+    let [, dd, mm, yyyy, hh, min, sec, ampm] = dashMatch;
+    hh = parseInt(hh);
+    if (ampm.toUpperCase() === "PM" && hh !== 12) hh += 12;
+    if (ampm.toUpperCase() === "AM" && hh === 12) hh = 0;
+    return new Date(`${yyyy}-${mm}-${dd}T${String(hh).padStart(2, '0')}:${min}:${sec}`);
+  }
+
+  return null;
+}
+
+function calculateSpendingByTime(userbill) {
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10); // YYYY-MM-DD
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  let total = 0, today = 0, week = 0, month = 0;
+
+  for (const bill of userbill) {
+    const amountRaw = bill?.json?.total_amount;
+    const dateStr = bill?.json?.time_stamp;
+
+    if (!amountRaw || !dateStr) continue;
+
+    const amount = typeof amountRaw === "string"
+      ? parseFloat(amountRaw.match(/\d+(\.\d+)?/)?.[0] || 0)
+      : amountRaw;
+
+    if (isNaN(amount)) continue;
+
+    const billDate = parseFlexibleDate(dateStr);
+    if (!billDate || isNaN(billDate)) continue;
+
+    total += amount;
+
+    if (billDate.toISOString().slice(0, 10) === todayStr) {
+      today += amount;
+    }
+
+    if (billDate >= startOfWeek && billDate <= now) {
+      week += amount;
+    }
+
+    if (billDate >= startOfMonth && billDate <= now) {
+      month += amount;
+    }
+  }
+
+  return { total, today, week, month };
+}
+
+const { total, today, week, month } = calculateSpendingByTime(userBill || []);
+console.log({ total, today, week, month });
   function calculateTotalSpending(userbill) {
     return userbill.reduce((sum, bill) => {
       const amount = bill["json"].total_amount;
+      console.log(bill["json"].time_stamp)
       if (typeof amount === "string") {
         const digits = amount.match(/\d+(\.\d+)?/); // Matches integer or decimal numbers
         if (digits) {
@@ -166,10 +238,10 @@ const Home = () => {
   }
 
   const data = {
-    month: { spent: parseInt(value), budget: budget, percentage: 80 },
-    week: { spent: parseInt(value/4), budget: parseInt((budget)/4), percentage: 75 },
-    day: { spent: parseInt(value/30), budget: parseInt((budget)/30), percentage: 50 },
-    overall:{spent:parseInt(value),budget:budget,percentage:90}
+    This_Month: { spent: month, budget: budget, percentage: parseInt((month / budget) * 100) },
+    This_week: { spent: week, budget: parseInt((budget)/4), percentage: parseInt((week/4) / (budget/4) * 100) },
+    Today: { spent: today, budget: parseInt((budget)/30), percentage: parseInt((today/30) / (budget/30) * 100) },
+    overall:{spent:total,budget:budget,percentage: parseInt((total / budget) * 100)}
   };
   console.log(budgetObject)
   if (loading) return <SkeletonLayout />;
@@ -193,7 +265,7 @@ const Home = () => {
     {Object.entries(data).map(([key, values], index) => (
       <SpendingCard
         key={index}
-        title={`This ${key.charAt(0).toUpperCase() + key.slice(1)}`}
+        title={`${key.charAt(0).toUpperCase() + key.slice(1)}`}
         spent={`${values.spent}/-`}
         budget={`${values.budget}/-`}
         color="#10B981"
