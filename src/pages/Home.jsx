@@ -104,6 +104,7 @@ const Home = () => {
  
   const [userData, setUserData] = useState(null);
   const [userBills,setUserBills]=useState(null);
+  const [htmlData,setHtmlData]=useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -136,11 +137,24 @@ const Home = () => {
   const budget=userData?.usersettings?.montly_budget
 
   const recieptsData=userData?.user_bills!=null;
-  
-  const userbill=userData?.user_bills[0]
-  
-
-  
+  const userBill=userData?.user_bills;
+  console.log(userBill)
+  function calculateTotalSpending(userbill) {
+    return userbill.reduce((sum, bill) => {
+      const amount = bill["json"].total_amount;
+      if (typeof amount === "string") {
+        const digits = amount.match(/\d+(\.\d+)?/); // Matches integer or decimal numbers
+        if (digits) {
+          return sum + parseFloat(digits[0]);
+        }
+      } else if (typeof amount === "number") {
+        return sum + amount;
+      }
+      return sum;
+    }, 0);
+  }
+  const value=calculateTotalSpending(userBill)
+  console.log(value)
   const chatData=userData?.chatLogs!=null;
   const budgetObject={
     month:budget,
@@ -149,10 +163,10 @@ const Home = () => {
   }
 
   const data = {
-    month: { spent: 12000, budget: budget, percentage: 80 },
-    week: { spent: 3000, budget: parseInt((budget)/4), percentage: 75 },
-    day: { spent: 500, budget: parseInt((budget)/30), percentage: 50 },
-    overall:{spent:12000,budget:budget,percentage:90}
+    month: { spent: parseInt(value), budget: budget, percentage: 80 },
+    week: { spent: parseInt(value/4), budget: parseInt((budget)/4), percentage: 75 },
+    day: { spent: parseInt(value/30), budget: parseInt((budget)/30), percentage: 50 },
+    overall:{spent:parseInt(value),budget:budget,percentage:90}
   };
   console.log(budgetObject)
   return (
