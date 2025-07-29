@@ -139,6 +139,18 @@
     padding: 20px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+  }
+  .save-chat-btn {
+    background: #007AFF;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
   }
   
   .hamburger-menu {

@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import BottomNav from '../components/BottomNav';
 import './AskStyles.css';
-import {auth} from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
-
+import {auth,db} from '../firebase';
+import { doc,getDoc, updateDoc,arrayUnion } from "firebase/firestore";
 const Ask = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chats, setChats] = useState([]);
@@ -13,7 +12,32 @@ const Ask = () => {
   const [isTyping, setIsTyping] = useState(false);
   const chatContainerRef = useRef(null);
   const [username,setUserName]=useState(null);
+  const [userpresentChat,setUserPresentChat]=useState(null);
+  const [isChats, setIsChats] = useState(false);
+  const [dbchats, setDbChats] = useState(null);
   const uid=auth.currentUser.uid;
+
+
+  const userChatDb= async()=>{
+    try {
+            const userRef = doc(db, 'users', uid);
+            const docSnap = await getDoc(userRef);
+            
+            if (docSnap.exists()) {
+              setIsChats(true)
+              setDbChats(docSnap.data().user_chats);
+              
+              console.log("retrieved successfully");
+            } else {
+              console.log("No user data found in Firestore");
+            }
+          } catch (err) {
+            console.error("Error fetching user data:", err);
+          }
+
+    
+  }
+  userChatDb();
   console.log(username)
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -29,7 +53,7 @@ const Ask = () => {
 
   const switchToChat = (index) => {
     setCurrentChatIndex(index);
-    setChats(allChats[index]);
+    setChats(dbchats[index].chat);
     setSidebarOpen(false);
   };
 
@@ -102,14 +126,15 @@ const Ask = () => {
   const userMessage = { user: trimmedMessage, chatbot: null };
   const newChats = [...chats, userMessage];
   setChats(newChats);
-
+  
   // Step 2: Clear input and set typing state
   setInputValue('');
   setIsTyping(true);
-
+  console.log("User new chat", newChats);
   // Step 3: Update allChats state for current chat index
   const updatedAllChats = [...allChats];
   updatedAllChats[currentChatIndex] = newChats;
+  console.log("Updated allChats:", updatedAllChats);
   setAllChats(updatedAllChats);
 
   // Step 4: Fetch API response
@@ -125,7 +150,31 @@ const Ask = () => {
   const updatedAllChatsWithResponse = [...updatedAllChats];
   updatedAllChatsWithResponse[currentChatIndex] = updatedChats;
   setAllChats(updatedAllChatsWithResponse);
+  console.log("Updated allChats with response:", updatedAllChatsWithResponse);
 };
+const saveChats = async () => {
+  if (allChats[currentChatIndex].length === 0) {
+    alert('No chats to save.');
+    return;
+  }
+
+  const userRef = doc(db, "users", uid);
+  const chatData = {
+    chat: allChats[currentChatIndex],
+    timestamp: new Date().toISOString(),
+  };
+  console.log("Saving chat data:", chatData);
+  try {
+    await updateDoc(userRef, {
+      user_chats: arrayUnion(chatData)
+    });
+    console.log("Chat saved successfully");
+    alert('Chat saved successfully!');
+  } catch (error) {
+    console.error("Error saving chat:", error);
+    alert('Failed to save chat. Please try again.');
+  }
+}
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -141,6 +190,7 @@ const Ask = () => {
 
   // Console log the chats for debugging
 
+console.log(allChats)
 
   return (
     <div className="page ask-page">
@@ -158,20 +208,22 @@ const Ask = () => {
         <button className="new-chat-btn" onClick={startNewChat}>
           + New Chat
         </button>
-        <div className="chat-list">
-          {allChats.map((chat, index) => (
+        {isChats && (<div className="chat-list">
+          {dbchats.map((chat, index) => (
             <div
               key={index}
+              
               className={`chat-item ${index === currentChatIndex ? 'active' : ''}`}
               onClick={() => switchToChat(index)}
             >
-              <span>Chat {index + 1}</span>
-              {chat.length > 0 && (
-                <small>{chat[0].user.substring(0, 30)}...</small>
+              <span>{chat.timestamp}</span>
+              {dbchats[index].chat[0].user.length > 0 && (
+                <p>{chat.chat[0].user.substring(0, 30)}...</p>
               )}
             </div>
           ))}
-        </div>
+        </div>)}
+        
       </div>
 
       {/* Main Content */}
@@ -182,6 +234,9 @@ const Ask = () => {
             <div className="hamburger-line"></div>
             <div className="hamburger-line"></div>
             <div className="hamburger-line"></div>
+          </button>
+          <button className='save-chat-btn' onClick={saveChats}>
+            Save Chat
           </button>
         </div>
 

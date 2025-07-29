@@ -108,6 +108,8 @@ const Home = () => {
   const [htmlData,setHtmlData]=useState(null);
   const [loading, setLoading] = useState(true);
    const [modalHtml, setModalHtml] = useState(null);
+   const [chats, setChats] = useState(false);
+   const [dbchats, setDbChats] = useState([]);
   
   useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -118,6 +120,12 @@ const Home = () => {
         
         if (docSnap.exists()) {
           setUserData(docSnap.data());
+          
+          if(docSnap.data().user_chats.length > 0){
+            
+            setChats(docSnap.data().user_chats.length > 0);
+            setDbChats(docSnap.data().user_chats);
+          }
           setLoading(false);
           console.log("retrieved successfully");
         } else {
@@ -308,7 +316,7 @@ console.log({ total, today, week, month });
           {/* Modal */}
       {modalHtml && (
         <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center px-4">
-          <div className="bg-black rounded-lg max-w-full max-h-[90vh] overflow-auto relative p-6 shadow-lg">
+          <div className="bg-black rounded-lg max-w-full max-h-[90vh] overflow-auto hide-scrollbar relative scroll p-6 shadow-lg">
             <button
               onClick={closeModal}
               className="absolute top-2 right-2 text-white text-xl font-bold"
@@ -319,9 +327,27 @@ console.log({ total, today, week, month });
           </div>
         </div>
       )}
-
         {/* Recent Chat */}
-        <div>
+        {chats?( <div className="chat-list">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium">Recent chat</h2>
+            <button className="text-gray-400 text-sm hover:text-white transition-colors">
+              view all
+            </button>
+          </div>
+          {dbchats.map((chat, index) => (
+            <div
+              key={index}
+              className='chat-item'
+              onClick={() => console.log("clicked")}
+            >
+              <span>{chat.timestamp}</span>
+              {dbchats[index].chat[0].user.length > 0 && (
+                <p>{chat.chat[0].user.substring(0, 30)}...</p>
+              )}
+            </div>
+          ))}
+        </div>):(<div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium">Recent chat</h2>
             <button className="text-gray-400 text-sm hover:text-white transition-colors">
@@ -336,7 +362,7 @@ console.log({ total, today, week, month });
               
             />
           </div>
-        </div>
+        </div>)}
       </div>
     </div>
 
