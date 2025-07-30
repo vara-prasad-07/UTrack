@@ -1,7 +1,7 @@
 import React from 'react';
 import BottomNav from '../components/BottomNav';
 import './PageStyles.css';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc,updateDoc } from 'firebase/firestore';
 import { auth,db } from '../firebase'; 
 import  SkeletonLayout from "../components/SkeletonLayout"
 import { useEffect, useState } from 'react';
@@ -110,11 +110,13 @@ const Home = () => {
    const [modalHtml, setModalHtml] = useState(null);
    const [chats, setChats] = useState(false);
    const [dbchats, setDbChats] = useState([]);
+   const [useruid,setUserUid]=useState(null);
   
   useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, async (user) => {
     if (user) {
       try {
+        setUserUid(user.uid)
         const userRef = doc(db, 'users', user.uid);
         const docSnap = await getDoc(userRef);
         
@@ -259,6 +261,27 @@ console.log({ total, today, week, month });
     Today: { spent: today, budget: parseInt((budget)/30), percentage: parseInt((today/30) / (budget/30) * 100) },
     overall:{spent:total,budget:budget,percentage: parseInt((total / budget) * 100)}
   };
+
+const userSpendings={
+  today: { spent: today, budget: parseInt((budget)/30) },
+  this_week: { spent: week, budget: parseInt((budget)/4) },
+  this_month: { spent: month, budget: budget },
+  overall: { spent: total, budget: budget }
+}
+
+const updateUserSpendings = async () => {
+  try {
+    const userRef = doc(db, "users", useruid);
+    await updateDoc(userRef, {
+      userspendings: userSpendings
+    });
+    console.log("✅ userspendings updated successfully.");
+  } catch (error) {
+    console.error("❌ Error updating userspendings:", error);
+  }
+};
+
+updateUserSpendings();
   console.log(budgetObject)
   if (loading) return <SkeletonLayout />;
   return (

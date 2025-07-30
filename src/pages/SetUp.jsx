@@ -62,7 +62,7 @@ useEffect(() => {
     }
     setBudgetError('');
     setLoading(true)
-    const user_settings={ "usersettings":  {"currency":selectedCurrency,"montly_budget":budget},"user_bills":[], "user_chats":[]}
+    const user_settings={ "usersettings":  {"currency":selectedCurrency,"montly_budget":budget},"user_bills":[], "user_chats":[],userspendings:{}}
     await updateDoc(doc(db, "users", uid), user_settings);
     setLoading(false)
     navigate('/dashboard');
