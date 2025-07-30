@@ -1,0 +1,168 @@
+/* PageStyles.css */
+
+.page {
+    padding: 20px;
+    background-color: #1a1a1a; /* Dark background */
+    min-height: 100vh;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.text-white {
+    color: white;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.justify-content-center {
+    justify-content: center;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.text-bold {
+    font-weight: bold;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem;
+}
+
+.payment-form {
+    margin-top: 20px;
+    background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #f0f0f0; /* Slightly lighter white for labels */
+}
+
+.form-group input {
+    width: calc(100% - 20px); /* Account for padding */
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #555; /* Darker border */
+    background-color: #333; /* Dark input background */
+    color: white;
+    font-size: 16px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #007bff; /* Highlight on focus */
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.pay-button {
+    background-color: #007bff; /* Blue button */
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.pay-button:hover {
+    background-color: #0056b3;
+}
+
+/* Styles for the payment result section */
+.alerts-page {
+    padding: 20px;
+}
+
+.alerts-page h2 {
+    text-align: center;
+}
+
+.payment-result-container {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    margin: 20px 0;
+}
+
+.payment-status-header {
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.payment-status-header h4 {
+    margin: 0;
+}
+
+.payment-details-table {
+    width: 100%;
+    color: white;
+    border-collapse: collapse;
+}
+
+.payment-details-table td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.payment-details-table td:first-child {
+    font-weight: bold;
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.button-group button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.button-group button:first-child {
+    background-color: #007bff;
+}
+
+.button-group button:first-child:hover {
+    background-color: #0056b3;
+}
+
+.button-group button:last-child {
+    background-color: #6c757d;
+}
+
+.button-group button:last-child:hover {
+    background-color: #5a6268;
+}
+
+
