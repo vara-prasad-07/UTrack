@@ -5,12 +5,6 @@
   "version": "1.0.0",
   "type": "module",
   "keywords": ["security", "expense-tracking", "finance", "react", "firebase", "pwa"],
-  "author": "UTrack Team",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/PATTASWAMY-VISHWAK-YASASHREE/UTrack.git"
-  },
-  "homepage": "https://github.com/PATTASWAMY-VISHWAK-YASASHREE/UTrack",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
