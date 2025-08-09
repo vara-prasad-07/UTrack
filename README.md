@@ -12,7 +12,7 @@
 
 *A modern web application that combines robust security features with intelligent expense tracking and progress monitoring.*
 
-[🚀 Live Demo](#) | [📖 Documentation](#) | [🐛 Report Bug](https://github.com/PATTASWAMY-VISHWAK-YASASHREE/UTrack/issues) | [💡 Request Feature](https://github.com/PATTASWAMY-VISHWAK-YASASHREE/UTrack/issues)
+[🚀 Live Demo](https://musical-naiad-0639f5.netlify.app/) | [📖 Documentation](#) | [🐛 Report Bug](https://github.com/vara-prasad-07/UTrack/issues) | [💡 Request Feature](https://github.com/https://github.com/vara-prasad-07/UTrack/issues)
 
 </div>
 
