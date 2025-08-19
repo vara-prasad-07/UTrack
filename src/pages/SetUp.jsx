@@ -79,9 +79,9 @@ useEffect(() => {
 
   return (
 
-    <div className="min-vh-100 bg-black text-white">
+    <div className="min-h-screen bg-black text-white">
         {loading && <CustomSpinner />}
-      <div className="container py-5">
+      <div className="container mx-auto px-4 py-5">
         <div className="text-center mb-5">
           <div className="mb-4">
            
@@ -89,37 +89,33 @@ useEffect(() => {
           </div>
           
           {/* Progress Steps */}
-          <div className="d-flex align-items-center justify-content-center mb-5">
-            <div className={`rounded-circle d-flex align-items-center justify-content-center ${currentStep >= 1 ? 'bg-primary' : 'bg-secondary'}`} 
-                 style={{ width: '40px', height: '40px' }}>
-              <span className="text-white fw-bold">1</span>
+          <div className="flex items-center justify-center mb-5">
+            <div className={`${currentStep >= 1 ? 'bg-blue-600' : 'bg-gray-600'} rounded-full flex items-center justify-center w-10 h-10`}>
+              <span className="text-white font-bold">1</span>
             </div>
-            <div className={`mx-3 ${currentStep >= 2 ? 'bg-primary' : 'bg-secondary'}`} 
-                 style={{ height: '4px', width: '100px' }}></div>
-            <div className={`rounded-circle d-flex align-items-center justify-content-center ${currentStep >= 2 ? 'bg-primary' : 'bg-secondary'}`} 
-                 style={{ width: '40px', height: '40px' }}>
-              <span className="text-white fw-bold">2</span>
+            <div className={`mx-3 ${currentStep >= 2 ? 'bg-blue-600' : 'bg-gray-600'}`} style={{ height: '4px', width: '100px' }}></div>
+            <div className={`${currentStep >= 2 ? 'bg-blue-600' : 'bg-gray-600'} rounded-full flex items-center justify-center w-10 h-10`}>
+              <span className="text-white font-bold">2</span>
             </div>
           </div>
           
-          <p className="text-primary mb-0">Step {currentStep}</p>
+          <p className="text-blue-500 mb-0">Step {currentStep}</p>
         </div>
 
-        <div className="row justify-content-center">
-          <div className="col-12 col-md-6 col-lg-4">
+        <div className="flex justify-center">
+          <div className="w-full max-w-xl">
             {currentStep === 1 && (
               <div className="text-center">
-                <h3 className="text-white fw-bold mb-4">Choose Currency</h3>
+                <h3 className="text-white font-bold mb-4">Choose Currency</h3>
                 
                 <div className="mb-4">
                   <select 
-                    className="form-select form-select-lg bg-secondary text-white border-0"
+                    className="w-full text-white bg-gray-700 border-0 rounded-lg px-3 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={selectedCurrency}
                     onChange={(e) => setSelectedCurrency(e.target.value)}
-                    style={{ backgroundColor: '#343a40 !important' }}
                   >
                     {currencies.map((currency) => (
-                      <option key={currency.code} value={currency.code} className="bg-secondary">
+                      <option key={currency.code} value={currency.code} className="bg-gray-700">
                         {currency.code} - {currency.name} ({currency.symbol})
                       </option>
                     ))}
@@ -127,7 +123,7 @@ useEffect(() => {
                 </div>
 
                 <button 
-                  className="btn btn-primary btn-lg px-5"
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-5 py-3"
                   onClick={handleStep1Next}
                 >
                   Next →
@@ -137,16 +133,16 @@ useEffect(() => {
 
             {currentStep === 2 && (
               <div className="text-center">
-                <h3 className="text-white fw-bold mb-4">Set Your Monthly Budget</h3>
+                <h3 className="text-white font-bold mb-4">Set Your Monthly Budget</h3>
                 
                 <div className="mb-3">
-                  <div className="input-group input-group-lg">
-                    <span className="input-group-text bg-secondary text-white border-0">
+                  <div className="flex items-stretch text-white">
+                    <span className="inline-flex items-center px-4 rounded-l-lg bg-gray-700 border border-r-0 border-gray-600">
                       {currencies.find(c => c.code === selectedCurrency)?.symbol}
                     </span>
                     <input
                       type="number"
-                      className="form-control bg-secondary text-white border-0"
+                      className="flex-1 bg-gray-700 text-white border border-gray-600 rounded-r-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Enter value"
                       value={monthlyBudget}
                       onChange={handleBudgetChange}
@@ -155,21 +151,21 @@ useEffect(() => {
                     />
                   </div>
                   {budgetError && (
-                    <div className="alert alert-danger mt-2 mb-0">
+                    <div className="mt-2 mb-0 text-red-500 text-sm">
                       <small>{budgetError}</small>
                     </div>
                   )}
                 </div>
 
-                <div className="d-flex gap-2 justify-content-center">
+                <div className="flex gap-2 justify-content-center">
                   <button 
-                    className="btn btn-outline-secondary"
+                    className="border border-gray-500 text-white rounded-lg px-4 py-2"
                     onClick={() => setCurrentStep(1)}
                   >
                     ← Back
                   </button>
                   <button 
-                    className="btn btn-primary btn-lg px-4"
+                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2"
                     onClick={handleStep2Next}
                   >
                     Next →
@@ -180,10 +176,6 @@ useEffect(() => {
           </div>
         </div>
       </div>
-      <link
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
-        rel="stylesheet"
-      />
     </div>
   );
 };

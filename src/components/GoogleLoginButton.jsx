@@ -41,29 +41,14 @@ function GoogleLoginButton() {
   return (
     <button
       type="button"
-      className="btn w-100 d-flex align-items-center justify-content-center mb-4"
+      className="w-full mb-4 h-[50px] text-[16px] font-semibold rounded-full text-[#333] bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
       onClick={handleGoogleLogin}
-      style={{
-        height: '50px',
-        fontSize: '16px',
-        fontWeight: '600',
-        backgroundColor: '#e9ecef',
-        border: 'none',
-        borderRadius: '25px',
-        color: '#333'
-      }}
     >
-      <span className="me-2">Continue With</span>
+      <span className="mr-2">Continue With</span>
       <div
-        className="rounded-circle d-flex align-items-center justify-content-center"
-        style={{
-          width: '24px',
-          height: '24px',
-          backgroundColor: '#fff',
-          border: '1px solid #ddd'
-        }}
+        className="rounded-full flex items-center justify-center w-6 h-6 bg-white border border-gray-300"
       >
-        <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#4285f4' }}>G</span>
+        <span className="text-[14px] font-bold text-[#4285f4]">G</span>
       </div>
     </button>
   );

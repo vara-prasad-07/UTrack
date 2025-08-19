@@ -39,11 +39,11 @@ const Login = () => {
   };
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{backgroundColor: '#000'}}>
-      <div className="container-fluid px-3">
-        <div className="row justify-content-center">
+    <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="w-full px-3">
+        <div className="flex justify-center">
        
-          <div className="col-12" style={{maxWidth: '400px'}}>
+          <div className="w-full max-w-[400px]">
           
             {/* Header with Logo */}
             <div className="flex items-center justify-start p-6 pt-12">
@@ -55,70 +55,47 @@ const Login = () => {
         </div>
       </div>
             {/* Login Card */}
-            <div className="card border-0 shadow-lg" style={{borderRadius: '20px'}}>
-              <div className="card-body p-4">
+            <div className="bg-white shadow-lg rounded-[20px]">
+              <div className="p-4">
                 
                 {/* Login Title */}
-                <h3 className="text-center mb-4" style={{fontSize: '32px', fontWeight: '600', color: '#333'}}>
+                <h3 className="text-center mb-4 text-[32px] font-semibold text-[#333]">
                   Login
                 </h3>
                 {loading && <CustomSpinner />}
                 {/* Email Field */}
                 <div className="mb-3">
-                  <div className="form-label mb-2" style={{fontSize: '16px', color: '#666', fontWeight: '500'}}>
+                  <div className="mb-2 text-[16px] text-[#666] font-medium">
                     Email Id
                   </div>
                   <input
                     type="email"
-                    className="form-control"
+                    className="w-full h-[50px] text-[16px] border border-[#ddd] rounded-lg bg-[#f8f9fa] px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     placeholder="Enter your Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    style={{
-                      height: '50px',
-                      fontSize: '16px',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      backgroundColor: '#f8f9fa'
-                    }}
                   />
                 </div>
 
                 {/* Password Field */}
                 <div className="mb-4">
-                  <div className="form-label mb-2" style={{fontSize: '16px', color: '#666', fontWeight: '500'}}>
+                  <div className="mb-2 text-[16px] text-[#666] font-medium">
                     Password
                   </div>
                   <input
                     type="password"
-                    className="form-control"
+                    className="w-full h-[50px] text-[16px] border border-[#ddd] rounded-lg bg-[#f8f9fa] px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     placeholder="Enter your PassWord"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    style={{
-                      height: '50px',
-                      fontSize: '16px',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      backgroundColor: '#f8f9fa'
-                    }}
                   />
                 </div>
 
                 {/* Login Button */}
                 <button
                   type="button"
-                  className="btn w-100 mb-3"
+                  className="w-full mb-3 h-[50px] text-[18px] font-semibold rounded-full text-white bg-blue-600 hover:bg-blue-700"
                   onClick={handleLogin}
-                  style={{
-                    height: '50px',
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    backgroundColor: '#007bff',
-                    border: 'none',
-                    borderRadius: '25px',
-                    color: '#fff'
-                  }}
                 >
                   login
                 </button>
@@ -133,19 +110,11 @@ const Login = () => {
 
                 {/* Signup Link */}
                 <div className="text-center">
-                  <span style={{fontSize: '16px', color: '#666'}}>
+                  <span className="text-[16px] text-[#666]">
                     Don't have an account?{' '}
                     <button 
-                      className="btn p-0"
+                      className="p-0 text-blue-600 font-semibold bg-transparent border-0"
                       onClick={handleSignup}
-                      style={{
-                        color: '#007bff',
-                        textDecoration: 'none',
-                        fontWeight: '600',
-                        border: 'none',
-                        background: 'none',
-                        fontSize: '16px'
-                      }}
                     >
                       Signup
                     </button>
@@ -157,12 +126,6 @@ const Login = () => {
           </div>
         </div>
       </div>
-
-      {/* Bootstrap CSS */}
-      <link
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
-        rel="stylesheet"
-      />
     </div>
   );
 };
