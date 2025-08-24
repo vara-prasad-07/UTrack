@@ -136,8 +136,20 @@ const CircularProgress = ({ percentage, color }) => {
   );
 };
 
-const SpendingCard = ({ title, spent, budget, color, percentage }) => (
-  <div className="bg-gray-800 p-4 rounded-lg flex-1 min-w-[140px]">
+const SpendingCard = ({keyValue, title, spent, budget, color, percentage }) => (
+  keyValue==="overall"?
+  (<div className="bg-gray-800 p-4 rounded-lg flex-1 min-w-[140px]">
+    <h3 className="text-white text-sm mb-3">{title}</h3>
+    <div className="flex items-center justify-between">
+      <div className="mr-1">
+        <div className="text-white text-sm font-semibold">{spent}</div>
+        <hr className="border-white opacity-100 my-0" />
+        <div className="text-gray-400 text-sm">{budget}</div>
+      </div>
+      <CircularProgress percentage={percentage} color={color} />
+    </div>
+  </div>):(
+    <div className="bg-gray-800 p-4 rounded-lg flex-1 min-w-[140px]">
     <h3 className="text-white text-sm mb-3">{title}</h3>
     <div className="flex items-center justify-between">
       <div className="mr-1">
@@ -148,6 +160,7 @@ const SpendingCard = ({ title, spent, budget, color, percentage }) => (
       <CircularProgress percentage={percentage} color={color} />
     </div>
   </div>
+  )
 );
 
 const ReceiptItem = ({ amount, type, onViewClick }) => (
@@ -422,6 +435,7 @@ const Home = () => {
               {Object.entries(data).map(([key, values], index) => (
                 <SpendingCard
                   key={index}
+                  keyValue={key}
                   title={`${key.charAt(0).toUpperCase() + key.slice(1)}`}
                   spent={`${values.spent}/-`}
                   budget={`${values.budget}/-`}
@@ -442,7 +456,7 @@ const Home = () => {
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
               {Array.isArray(userData?.user_bills) && userData.user_bills.length > 0 ? (
-                userData.user_bills.map((bill, index) => (
+                userData.user_bills.slice().reverse().map((bill, index) => (
                   <ReceiptItem key={index} amount={bill["json"]} type="expense" onViewClick={() => openModal(bill["html"])} />
                 ))
               ) : (

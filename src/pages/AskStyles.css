@@ -9,6 +9,11 @@
     overflow: hidden;
   }
   
+  /* Desktop Layout */
+  .desktop-layout {
+    flex-direction: row;
+  }
+  
   /* Sidebar Overlay */
   .sidebar-overlay {
     position: fixed;
@@ -38,6 +43,16 @@
   
   .sidebar-open {
     left: 0;
+  }
+  
+  /* Desktop Sidebar */
+  .desktop-sidebar {
+    position: relative;
+    left: 0;
+    width: 320px;
+    min-width: 320px;
+    border-right: 1px solid #333;
+    z-index: 1;
   }
   
   .sidebar-header {
@@ -134,6 +149,12 @@
     position: relative;
   }
   
+  /* Desktop Content */
+  .desktop-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
   /* Header */
   .ask-header {
     padding: 20px;
@@ -141,6 +162,7 @@
     align-items: center;
     justify-content: space-between;
   }
+  
   .save-chat-btn {
     background: #007AFF;
     color: white;
@@ -357,6 +379,43 @@
   }
   
   /* Responsive Design */
+  @media (min-width: 1024px) {
+    .ask-page {
+      flex-direction: row;
+    }
+    
+    .sidebar {
+      position: relative;
+      left: 0;
+      width: 320px;
+      min-width: 320px;
+      border-right: 1px solid #333;
+      z-index: 1;
+    }
+    
+    .ask-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .chat-container {
+      max-height: calc(100vh - 140px);
+    }
+    
+    .welcome-screen h1 {
+      font-size: 36px;
+    }
+    
+    .welcome-screen p {
+      font-size: 20px;
+      max-width: 500px;
+    }
+    
+    .message {
+      max-width: 70%;
+    }
+  }
+  
   @media (max-width: 768px) {
     .sidebar {
       width: 280px;

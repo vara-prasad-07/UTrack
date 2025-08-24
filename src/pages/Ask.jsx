@@ -3,6 +3,7 @@ import BottomNav from '../components/BottomNav';
 import './AskStyles.css';
 import {auth,db} from '../firebase';
 import { doc,getDoc, updateDoc,arrayUnion } from "firebase/firestore";
+
 const Ask = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chats, setChats] = useState([]);
@@ -15,8 +16,25 @@ const Ask = () => {
   const [userpresentChat,setUserPresentChat]=useState(null);
   const [isChats, setIsChats] = useState(false);
   const [dbchats, setDbChats] = useState(null);
+  const [isDesktop, setIsDesktop] = useState(false);
   const uid=auth.currentUser.uid;
 
+  // Check if screen is desktop size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+      // Auto-open sidebar on desktop
+      if (window.innerWidth >= 1024) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   const userChatDb= async()=>{
     try {
@@ -48,13 +66,19 @@ const Ask = () => {
     setAllChats([...allChats, []]);
     setCurrentChatIndex(newChatIndex);
     setChats([]);
-    setSidebarOpen(false);
+    // Only close sidebar on mobile
+    if (!isDesktop) {
+      setSidebarOpen(false);
+    }
   };
 
   const switchToChat = (index) => {
     setCurrentChatIndex(index);
     setChats(dbchats[index].chat);
-    setSidebarOpen(false);
+    // Only close sidebar on mobile
+    if (!isDesktop) {
+      setSidebarOpen(false);
+    }
   };
 
   const TypingAnimation = () => {
@@ -116,7 +140,6 @@ const Ask = () => {
     }
   };
   
-
 
   const handleSendMessage = async () => {
   const trimmedMessage = inputValue.trim();
@@ -193,48 +216,53 @@ const saveChats = async () => {
 console.log(allChats)
 
   return (
-    <div className="page ask-page">
-      {/* Sidebar Overlay */}
-      {sidebarOpen && (
+    <div className={`page ask-page ${isDesktop ? 'desktop-layout' : ''}`}>
+      {/* Sidebar Overlay - only show on mobile */}
+      {sidebarOpen && !isDesktop && (
         <div className="sidebar-overlay" onClick={toggleSidebar}></div>
       )}
 
       {/* Sidebar */}
-      <div className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
+      <div className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''} ${isDesktop ? 'desktop-sidebar' : ''}`}>
         <div className="sidebar-header">
-          <h3>Chats</h3>
-          <button className="close-sidebar" onClick={toggleSidebar}>×</button>
+          <h3>Recent Chats</h3>
+          {!isDesktop && (
+            <button className="close-sidebar" onClick={toggleSidebar}>×</button>
+          )}
         </div>
         <button className="new-chat-btn" onClick={startNewChat}>
           + New Chat
         </button>
-        {isChats && (<div className="chat-list">
-          {dbchats.map((chat, index) => (
-            <div
-              key={index}
-              
-              className={`chat-item ${index === currentChatIndex ? 'active' : ''}`}
-              onClick={() => switchToChat(index)}
-            >
-              <span>{chat.timestamp}</span>
-              {dbchats[index].chat[0].user.length > 0 && (
-                <p>{chat.chat[0].user.substring(0, 30)}...</p>
-              )}
-            </div>
-          ))}
-        </div>)}
+        {isChats && (
+          <div className="chat-list">
+            {dbchats.map((chat, index) => (
+              <div
+                key={index}
+                className={`chat-item ${index === currentChatIndex ? 'active' : ''}`}
+                onClick={() => switchToChat(index)}
+              >
+                <span>{chat.timestamp}</span>
+                {dbchats[index].chat[0].user.length > 0 && (
+                  <p>{chat.chat[0].user.substring(0, 30)}...</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         
       </div>
 
       {/* Main Content */}
-      <div className="ask-content">
+      <div className={`ask-content ${isDesktop ? 'desktop-content' : ''}`}>
         {/* Header with hamburger menu */}
         <div className="ask-header">
-          <button className="hamburger-menu" onClick={toggleSidebar}>
-            <div className="hamburger-line"></div>
-            <div className="hamburger-line"></div>
-            <div className="hamburger-line"></div>
-          </button>
+          {!isDesktop && (
+            <button className="hamburger-menu" onClick={toggleSidebar}>
+              <div className="hamburger-line"></div>
+              <div className="hamburger-line"></div>
+              <div className="hamburger-line"></div>
+            </button>
+          )}
           <button className='save-chat-btn' onClick={saveChats}>
             Save Chat
           </button>
