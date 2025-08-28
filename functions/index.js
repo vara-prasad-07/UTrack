@@ -11,6 +11,9 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
+// Ensure FieldValue is available
+const FieldValue = admin.firestore.FieldValue;
+
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
@@ -64,7 +67,7 @@ exports.createPaymentOrder = functions.https.onRequest(async (req, res) => {
       ...order,
       userId: userId,
       status: 'created',
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
+      createdAt: FieldValue.serverTimestamp()
     });
 
     res.json({
@@ -130,7 +133,7 @@ exports.verifyPayment = functions.https.onRequest(async (req, res) => {
       payment_id: razorpay_payment_id,
       signature: razorpay_signature,
       payment_details: payment,
-      completedAt: admin.firestore.FieldValue.serverTimestamp()
+      completedAt: FieldValue.serverTimestamp()
     });
 
     // Create transaction record
@@ -146,7 +149,7 @@ exports.verifyPayment = functions.https.onRequest(async (req, res) => {
       email: payment.email,
       contact: payment.contact,
       description: payment.description,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
       timestamp: new Date().toISOString()
     };
 
@@ -157,8 +160,8 @@ exports.verifyPayment = functions.https.onRequest(async (req, res) => {
     await userRef.update({
       [`transactions.${transactionRef.id}`]: transactionData,
       lastTransactionAt: new Date().toISOString(),
-      totalTransactions: admin.firestore.FieldValue.increment(1),
-      totalAmountSpent: admin.firestore.FieldValue.increment(payment.amount / 100)
+      totalTransactions: FieldValue.increment(1),
+      totalAmountSpent: FieldValue.increment(payment.amount / 100)
     });
 
     res.json({
@@ -224,7 +227,7 @@ const handlePaymentCaptured = async (payment) => {
       const transactionDoc = transactionQuery.docs[0];
       await transactionDoc.ref.update({
         status: 'captured',
-        capturedAt: admin.firestore.FieldValue.serverTimestamp()
+        capturedAt: FieldValue.serverTimestamp()
       });
     }
 
@@ -246,7 +249,7 @@ const handlePaymentFailed = async (payment) => {
       const transactionDoc = transactionQuery.docs[0];
       await transactionDoc.ref.update({
         status: 'failed',
-        failedAt: admin.firestore.FieldValue.serverTimestamp(),
+        failedAt: FieldValue.serverTimestamp(),
         error_description: payment.error_description
       });
     }
