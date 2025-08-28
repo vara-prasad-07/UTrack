@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - UTrack</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3399cc;
+            --success-color: #28a745;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            max-width: 180px;
+            margin-bottom: 20px;
+        }
+        
+        .success-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .success-icon {
+            background-color: var(--success-color);
+            color: white;
+            width: 80px;
+            height: 80px;
+            font-size: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        
+        .success-message {
+            font-size: 24px;
+            color: var(--success-color);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .success-details {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .detail-value {
+            font-weight: 500;
+        }
+        
+        .buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: #f0f8ff;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #777;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 20px auto;
+            }
+            
+            .success-card {
+                padding: 20px;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+        
+        /* Animation */
+        .animate-success {
+            animation: scaleIn 0.5s ease-in-out;
+        }
+        
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://via.placeholder.com/180x60?text=UTrack" alt="UTrack Logo" class="logo">
+        </div>
+        
+        <div class="success-card">
+            <div class="success-icon animate-success">
+                <i class="fas fa-check"></i>
+            </div>
+            <div class="success-message">Payment Successful!</div>
+            <p>Your transaction has been completed successfully.</p>
+            <p>A confirmation email has been sent to your registered email address.</p>
+            
+            <div class="success-details">
+                <div class="detail-item">
+                    <span class="detail-label">Transaction ID:</span>
+                    <span class="detail-value" id="transactionId">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Amount:</span>
+                    <span class="detail-value" id="amount">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Date & Time:</span>
+                    <span class="detail-value" id="dateTime">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Payment Method:</span>
+                    <span class="detail-value" id="paymentMethod">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value" style="color: var(--success-color); font-weight: bold;">Completed</span>
+                </div>
+            </div>
+            
+            <div class="buttons">
+                <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+                <a href="/transactions" class="btn btn-outline">View All Transactions</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 UTrack. All rights reserved.</p>
+            <p>If you have any questions, please contact our support team at support@utrack.com</p>
+        </div>
+    </div>
+    
+    <script>
+        // Parse URL parameters to get payment details
+        function getUrlParams() {
+            const params = {};
+            const queryString = window.location.search.substring(1);
+            const pairs = queryString.split('&');
+            
+            for (const pair of pairs) {
+                const [key, value] = pair.split('=');
+                params[decodeURIComponent(key)] = decodeURIComponent(value || '');
+            }
+            
+            return params;
+        }
+        
+        // Populate payment details from URL parameters or local storage
+        function populatePaymentDetails() {
+            const params = getUrlParams();
+            
+            // Check URL parameters first, then localStorage
+            const paymentData = params.paymentId ? {
+                transactionId: params.paymentId || '-',
+                amount: params.amount ? `₹${params.amount}` : '-',
+                method: params.method || 'Online',
+                dateTime: params.dateTime || new Date().toLocaleString()
+            } : JSON.parse(localStorage.getItem('lastPaymentData') || '{}');
+            
+            // Populate details from payment data
+            document.getElementById('transactionId').textContent = paymentData.transactionId || params.paymentId || '-';
+            document.getElementById('amount').textContent = paymentData.amount || params.amount ? `₹${params.amount}` : '-';
+            document.getElementById('dateTime').textContent = paymentData.dateTime || new Date().toLocaleString();
+            document.getElementById('paymentMethod').textContent = paymentData.method || 'Online';
+            
+            // Clear payment data from localStorage after displaying
+            localStorage.removeItem('lastPaymentData');
+        }
+        
+        // Store payment data for the success page
+        function storePaymentData(data) {
+            localStorage.setItem('lastPaymentData', JSON.stringify(data));
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            populatePaymentDetails();
+            
+            // Add click events to buttons
+            document.querySelectorAll('.btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    if (href.startsWith('/')) {
+                        e.preventDefault();
+                        // Handle navigation within your app
+                        console.log(`Navigating to: ${href}`);
+                        // Replace with your navigation logic
+                        // window.location.href = href;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

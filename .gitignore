@@ -23,3 +23,12 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Firebase configuration and sensitive files
+firebase.json
+firestore.rules
+firestore.indexes.json
+.firebaserc
+firebase-debug.log
+ui-debug.log
+.firebase/

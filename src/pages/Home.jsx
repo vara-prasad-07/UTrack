@@ -178,6 +178,98 @@ const ReceiptItem = ({ amount, type, onViewClick }) => (
   </div>
 );
 
+const TransactionItem = ({ transaction, transactionId }) => {
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'Unknown date';
+    const date = new Date(timestamp);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const getCurrencySymbol = (currency) => {
+    const symbols = {
+      'INR': '₹', 'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥',
+      'AUD': 'A$', 'CAD': 'C$', 'CHF': 'CHF', 'CNY': '¥', 'SGD': 'S$'
+    };
+    return symbols[currency] || currency;
+  };
+
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+      case 'captured':
+        return 'text-green-400';
+      case 'failed':
+        return 'text-red-400';
+      case 'pending':
+        return 'text-yellow-400';
+      default:
+        return 'text-gray-400';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+      case 'captured':
+        return '✅';
+      case 'failed':
+        return '❌';
+      case 'pending':
+        return '⏳';
+      default:
+        return '💳';
+    }
+  };
+
+  return (
+    <div className="bg-gray-700 p-4 rounded-lg border-l-4 border-blue-500">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-lg">{getStatusIcon(transaction.status)}</span>
+            <h4 className="text-white font-medium">
+              {transaction.description || 'Payment Transaction'}
+            </h4>
+            <span className={`text-xs px-2 py-1 rounded-full bg-gray-600 ${getStatusColor(transaction.status)}`}>
+              {transaction.status || 'Unknown'}
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="text-gray-400">Amount: </span>
+              <span className="text-white font-semibold">
+                {getCurrencySymbol(transaction.currency)}{transaction.amount}
+              </span>
+            </div>
+            <div>
+              <span className="text-gray-400">Method: </span>
+              <span className="text-white">{transaction.method || 'Card'}</span>
+            </div>
+            <div className="col-span-2">
+              <span className="text-gray-400">Date: </span>
+              <span className="text-white">{formatDate(transaction.timestamp)}</span>
+            </div>
+            {transaction.paymentId && (
+              <div className="col-span-2">
+                <span className="text-gray-400">ID: </span>
+                <span className="text-white font-mono text-xs">{transaction.paymentId}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className="ml-4 text-right">
+          <div className="text-blue-400 text-xs mb-1">TRANSACTION</div>
+          <div className="text-white font-mono text-xs bg-gray-600 px-2 py-1 rounded">
+            #{transactionId.slice(-6).toUpperCase()}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ChatItem = ({ is_chat, title, description }) => {
   if (is_chat) {
     return (
@@ -465,6 +557,42 @@ const Home = () => {
                   <p className="text-sm text-gray-400">
                     Use our <span className="text-blue-400 font-medium">advanced receipt scanning</span> tool to get started!
                   </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Recent Transactions */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-medium">Recent transactions</h2>
+              <button className="text-gray-400 text-sm hover:text-white transition-colors">
+                view all
+              </button>
+            </div>
+            <div className="receipts-card">
+              {userData?.transactions && Object.keys(userData.transactions).length > 0 ? (
+                <div className="flex flex-col gap-3">
+                  {Object.entries(userData.transactions).slice(-5).reverse().map(([transactionId, transaction]) => (
+                    <TransactionItem 
+                      key={transactionId} 
+                      transaction={transaction} 
+                      transactionId={transactionId}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-gray-800 text-white p-4 rounded-lg text-center shadow-md">
+                  <p className="text-lg font-semibold mb-2">💳 No transactions yet</p>
+                  <p className="text-sm text-gray-400 mb-3">
+                    Use our <span className="text-blue-400 font-medium">secure payment gateway</span> to make your first transaction!
+                  </p>
+                  <button 
+                    onClick={() => window.location.href = '/alerts'}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Make Payment
+                  </button>
                 </div>
               )}
             </div>

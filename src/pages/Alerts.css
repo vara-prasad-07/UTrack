@@ -1,91 +1,249 @@
-/* PageStyles.css */
+/* Razorpay Embed Button Styles */
+.razorpay-embed-btn {
+    display: inline-block;
+    margin: 10px 0;
+}
 
-.page {
-    padding: 20px;
-    background-color: #1a1a1a; /* Dark background */
-    min-height: 100vh;
+.razorpay-embed-btn iframe {
+    border-radius: 8px !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+.razorpay-embed-btn:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+.payment-heading {
     color: white;
-    font-family: Arial, sans-serif;
-}
-
-.text-white {
-    color: white;
-}
-
-.d-flex {
-    display: flex;
-}
-
-.flex-row {
-    flex-direction: row;
-}
-
-.justify-content-center {
-    justify-content: center;
-}
-
-.align-center {
-    align-items: center;
-}
-
-.text-bold {
+    font-size: 1.8rem;
     font-weight: bold;
-}
-
-.mb-4 {
-    margin-bottom: 1.5rem;
+    margin-bottom: 30px;
+    text-align: center;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .payment-form {
-    margin-top: 20px;
-    background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 8px;
-    font-weight: bold;
-    color: #f0f0f0; /* Slightly lighter white for labels */
+    font-weight: 600;
+    color: #e0e0e0;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.form-group input {
-    width: calc(100% - 20px); /* Account for padding */
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #555; /* Darker border */
-    background-color: #333; /* Dark input background */
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.08);
     color: white;
     font-size: 16px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
     outline: none;
-    border-color: #007bff; /* Highlight on focus */
+    border-color: #007bff;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.amount-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.currency-symbol {
+    position: absolute;
+    left: 16px;
+    color: #007bff;
+    font-weight: bold;
+    font-size: 18px;
+    z-index: 2;
+}
+
+.amount-input-group input {
+    padding-left: 45px;
+}
+
+.currency-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
 }
 
 .pay-button {
-    background-color: #007bff; /* Blue button */
+    background: linear-gradient(135deg, #007bff, #0056b3);
     color: white;
-    padding: 12px 25px;
+    padding: 16px 32px;
     border: none;
-    border-radius: 5px;
+    border-radius: 12px;
     cursor: pointer;
     font-size: 18px;
-    font-weight: bold;
+    font-weight: 600;
     width: 100%;
-    transition: background-color 0.3s ease;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 123, 255, 0.3);
 }
 
-.pay-button:hover {
-    background-color: #0056b3;
+.pay-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.pay-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Payment Result Styles */
+.payment-result-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.payment-status-header {
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.payment-status-header.success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.payment-status-header.error {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.payment-status-header.cancelled {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+}
+
+.payment-status-header h4 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.payment-details-table {
+    width: 100%;
+    color: white;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.payment-details-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.payment-details-table td:first-child {
+    font-weight: 600;
+    color: #b0b0b0;
+    width: 40%;
+}
+
+.payment-details-table td:last-child {
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.button-group button {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 180px;
+}
+
+.button-group button:first-child {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.button-group button:first-child:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+}
+
+.button-group button:last-child {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+
+.button-group button:last-child:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .payment-container {
+        padding: 15px;
+    }
+    
+    .payment-form {
+        padding: 20px;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .button-group button {
+        min-width: 100%;
+    }
 }
 
 /* Styles for the payment result section */

@@ -43,8 +43,8 @@ const Signup = () =>{
       }
       catch(error){
         setLoading(false);
-        console.error("Login error:", error.message);
-        alert("Invalid email or password");
+        console.error("Signup error:", error.message);
+        alert("Signup failed: " + error.message);
       }
     }
     

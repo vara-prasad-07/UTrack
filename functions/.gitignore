@@ -1,3 +1,8 @@
 node_modules/
 *.local
 .env
+
+# Firebase logs and debug files
+firebase-debug.log
+ui-debug.log
+firestore-debug.log

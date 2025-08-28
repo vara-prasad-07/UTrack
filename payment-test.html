@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTrack Payment Test</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #528FF0;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #4171d8;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        
+        .razorpay-embed-btn {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>UTrack Payment Function Test</h1>
+        
+        <div class="form-group">
+            <label for="endpoint">Function Endpoint:</label>
+            <select id="endpoint-select" onchange="updateEndpoint()">
+                <option value="http://localhost:5001/utrack-d3efb/us-central1/createPaymentOrder">Firebase Emulator (Local)</option>
+                <option value="http://localhost:3001/createPaymentOrder">Test Server (Mock)</option>
+                <option value="https://us-central1-utrack-d3efb.cloudfunctions.net/createPaymentOrder">Production (Cloud Functions)</option>
+            </select>
+            <input type="text" id="endpoint" value="http://localhost:5001/utrack-d3efb/us-central1/createPaymentOrder" />
+        </div>
+        
+        <div class="form-group">
+            <label for="amount">Amount (in smallest currency unit, e.g., paise):</label>
+            <input type="number" id="amount" value="10000" placeholder="10000 = ₹100" />
+        </div>
+        
+        <div class="form-group">
+            <label for="currency">Currency:</label>
+            <select id="currency">
+                <option value="INR">INR</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <input type="text" id="description" value="Test payment via UTrack" />
+        </div>
+        
+        <div class="form-group">
+            <label for="userId">User ID:</label>
+            <input type="text" id="userId" value="test-user-123" />
+        </div>
+        
+        <button onclick="testCreatePaymentOrder()">Test Create Payment Order</button>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        
+        <!-- Razorpay Payment Button -->
+        <div class="razorpay-embed-btn" data-url="https://pages.razorpay.com/pl_RAhd21hcpFmXes/view" data-text="Pay Now with Razorpay" data-color="#528FF0" data-size="medium">
+            <script>
+                (function(){
+                    var d=document; var x=!d.getElementById('razorpay-embed-btn-js')
+                    if(x){ var s=d.createElement('script'); s.defer=!0;s.id='razorpay-embed-btn-js';
+                    s.src='https://cdn.razorpay.com/static/embed_btn/bundle.js';d.body.appendChild(s);} else{var rzp=window['__rzp__'];
+                    rzp && rzp.init && rzp.init()}})();
+            </script>
+        </div>
+        
+        <h2>Instructions:</h2>
+        <ol>
+            <li>Start the Firebase emulators with: <code>firebase emulators:start</code></li>
+            <li>Make sure the endpoint URL above matches your local emulator</li>
+            <li>Click "Test Create Payment Order" to test the function</li>
+            <li>Use the Razorpay button above for actual payment testing</li>
+        </ol>
+    </div>
+
+    <script>
+        function updateEndpoint() {
+            const select = document.getElementById('endpoint-select');
+            const input = document.getElementById('endpoint');
+            input.value = select.value;
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+        }
+
+        async function testCreatePaymentOrder() {
+            try {
+                showStatus('Creating payment order...', 'info');
+                
+                const endpoint = document.getElementById('endpoint').value;
+                const amount = document.getElementById('amount').value;
+                const currency = document.getElementById('currency').value;
+                const description = document.getElementById('description').value;
+                const userId = document.getElementById('userId').value;
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        amount: parseInt(amount),
+                        currency: currency,
+                        description: description,
+                        userId: userId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus(`✅ Payment order created successfully! Order ID: ${data.order.id}`, 'success');
+                    console.log('Order details:', data.order);
+                } else {
+                    showStatus(`❌ Error: ${data.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showStatus(`❌ Network error: ${error.message}`, 'error');
+                console.error('Error:', error);
+            }
+        }
+        
+        // Test CORS preflight
+        async function testCORS() {
+            try {
+                const endpoint = document.getElementById('endpoint').value;
+                const response = await fetch(endpoint, { method: 'OPTIONS' });
+                console.log('CORS test response:', response.status);
+            } catch (error) {
+                console.error('CORS test failed:', error);
+            }
+        }
+        
+        // Auto-test CORS on page load
+        window.addEventListener('load', testCORS);
+    </script>
+</body>
+</html>

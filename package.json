@@ -4,12 +4,23 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "keywords": ["security", "expense-tracking", "finance", "react", "firebase", "pwa"],
+  "keywords": [
+    "security",
+    "expense-tracking",
+    "finance",
+    "react",
+    "firebase",
+    "pwa"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:all": "start \"Firebase Emulators\" cmd /k \"cd functions && firebase emulators:start\" && timeout /t 5 /nobreak > nul && start \"Vite Dev\" cmd /k \"npm run dev\" && start \"Test Server\" cmd /k \"cd functions && node test-server.cjs\" && start \"Payment Test\" cmd /k \"cd functions && node test-payment-functions.cjs\"",
+    "deploy:functions": "cd functions && firebase deploy --only functions",
+    "start:emulators": "cd functions && firebase emulators:start",
+    "test:functions": "cd functions && node test-payment-functions.cjs"
   },
   "dependencies": {
     "firebase": "^12.0.0",
@@ -24,14 +35,15 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
     "eslint": "^9.30.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
-    "vite": "^7.0.4",
-    "vite-plugin-pwa": "^1.0.2",
-    "tailwindcss": "^3.4.13",
     "postcss": "^8.4.41",
-    "autoprefixer": "^10.4.20"
+    "tailwindcss": "^3.4.13",
+    "vite": "^7.1.3",
+    "vite-plugin-pwa": "^1.0.2"
   }
 }

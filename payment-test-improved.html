@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTrack Payment Test - Improved</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .payment-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .payment-button:hover {
+            background-color: #0056b3;
+        }
+        
+        .payment-button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .embed-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 UTrack Payment Test - Improved Version</h1>
+        
+        <div id="status-message" style="display: none;"></div>
+        
+        <form id="payment-form">
+            <div class="form-group">
+                <label for="amount">Amount (₹):</label>
+                <input type="number" id="amount" name="amount" value="999.99" min="1" step="0.01" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <input type="text" id="description" name="description" value="Premium Plan Subscription" maxlength="100">
+            </div>
+            
+            <div class="form-group">
+                <label for="userId">User ID:</label>
+                <input type="text" id="userId" name="userId" value="user123" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" name="name" value="John Doe" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="john@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="contact">Phone Number:</label>
+                <input type="tel" id="contact" name="contact" value="9876543210" pattern="[0-9]{10}" required>
+            </div>
+            
+            <button type="submit" class="payment-button" id="pay-button">
+                💳 Pay Now
+            </button>
+        </form>
+        
+        <div class="embed-section">
+            <h2>Alternative: Razorpay Embed Button</h2>
+            <p>You can also use the embedded Razorpay payment button:</p>
+            
+            <!-- Razorpay Embed Button -->
+            <div>
+                <iframe src="https://pages.razorpay.com/pl_RAhd21hcpFmXes/view" 
+                        width="100%" 
+                        height="350" 
+                        frameborder="0" 
+                        allowtransparency="true">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Razorpay Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <script>
+        // Helper function to show status messages
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            // Auto-hide after 5 seconds for non-error messages
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Payment functions - updated with your improved code
+        
+        // Initialize Razorpay payment
+        function initializePayment(orderData, userInfo = {}) {
+            // Make sure we have the minimum required data
+            if (!orderData || !orderData.order || !orderData.order.id) {
+                console.error('Missing required order data for payment');
+                showStatus('Unable to initialize payment: Invalid order data', 'error');
+                return;
+            }
+
+            try {
+                // Configure Razorpay with only essential options
+                const options = {
+                    key: orderData.key_id || 'rzp_test_zAzYoKHbMhK7mn', // Use provided key or fallback to test key
+                    amount: orderData.order.amount || 0,
+                    currency: orderData.order.currency || 'INR',
+                    name: 'UTrack',
+                    description: 'Payment for services',
+                    order_id: orderData.order.id,
+                    handler: function(response) {
+                        console.log('Payment successful', response);
+                        verifyPayment(response, userInfo.userId || 'anonymous');
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            console.log('Checkout closed without payment');
+                            showStatus('Payment cancelled by user', 'info');
+                        }
+                    }
+                };
+
+                // Add optional fields only if they exist
+                if (userInfo.name || userInfo.email || userInfo.contact) {
+                    options.prefill = {};
+                    
+                    if (userInfo.name) options.prefill.name = userInfo.name;
+                    if (userInfo.email) options.prefill.email = userInfo.email;
+                    if (userInfo.contact) options.prefill.contact = userInfo.contact;
+                }
+
+                if (userInfo.userId) {
+                    options.notes = { userId: userInfo.userId };
+                }
+
+                // Initialize and open Razorpay
+                const rzp = new window.Razorpay(options);
+                
+                rzp.on('payment.failed', function(failedResponse) {
+                    console.error('Payment failed', failedResponse.error);
+                    showStatus('Payment failed: ' + (failedResponse.error.description || 'Unknown error'), 'error');
+                });
+                
+                rzp.open();
+            } catch (error) {
+                console.error('Error initializing payment', error);
+                showStatus('Unable to initialize payment: ' + (error.message || 'Unknown error'), 'error');
+            }
+        }
+
+        // Minimal and robust verification function
+        async function verifyPayment(response, userId = 'anonymous') {
+            console.log('Verifying payment...', response);
+            showStatus('Verifying payment...', 'info');
+            
+            // Ensure we have the minimum required data from Razorpay response
+            if (!response || !response.razorpay_payment_id || !response.razorpay_order_id || !response.razorpay_signature) {
+                console.error('Missing required payment data from Razorpay');
+                showStatus('Payment verification failed: Missing payment data', 'error');
+                return;
+            }
+            
+            try {
+                // Prepare verification data - only the essential fields
+                const verificationData = {
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    userId: userId || 'anonymous' // Fall back to anonymous if userId not provided
+                };
+                
+                console.log('Sending verification request:', verificationData);
+                
+                // Call the verification endpoint
+                const verifyResponse = await fetch('http://127.0.0.1:5001/utrack-d3efb/us-central1/verifyPayment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(verificationData)
+                });
+                
+                // Parse response
+                const result = await verifyResponse.json();
+                
+                if (result.success) {
+                    console.log('Payment verification successful:', result);
+                    
+                    // Store minimal payment data
+                    const paymentData = {
+                        transactionId: response.razorpay_payment_id,
+                        amount: result.payment?.amount ? `₹${result.payment.amount}` : 'Paid',
+                        method: result.payment?.method || 'Online',
+                        dateTime: new Date().toLocaleString()
+                    };
+                    
+                    // Store for success page
+                    localStorage.setItem('paymentData', JSON.stringify(paymentData));
+                    
+                    // Show success message
+                    showStatus('Payment successful! Redirecting to confirmation page...', 'success');
+                    
+                    // Redirect to success page
+                    setTimeout(() => {
+                        window.location.href = '/functions/payment-success.html';
+                    }, 2000);
+                } else {
+                    console.error('Payment verification failed:', result.error);
+                    showStatus('Payment verification failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error during payment verification:', error);
+                
+                // Still try to redirect to success page if we have the payment ID
+                // since the payment might have succeeded despite verification errors
+                if (response && response.razorpay_payment_id) {
+                    showStatus('Payment may have succeeded, but verification encountered an error. You will be redirected to the confirmation page.', 'info');
+                    
+                    const paymentData = {
+                        transactionId: response.razorpay_payment_id,
+                        amount: 'Verification pending',
+                        method: 'Online',
+                        dateTime: new Date().toLocaleString(),
+                        status: 'Verification pending'
+                    };
+                    
+                    localStorage.setItem('paymentData', JSON.stringify(paymentData));
+                    
+                    setTimeout(() => {
+                        window.location.href = '/functions/payment-success.html';
+                    }, 3000);
+                } else {
+                    showStatus('Payment verification failed. Please contact support with your payment ID if payment was deducted.', 'error');
+                }
+            }
+        }
+
+        // Function to create a payment order and then initialize checkout
+        async function createPaymentOrder(paymentDetails) {
+            showStatus('Creating payment order...', 'info');
+            
+            try {
+                const response = await fetch('http://127.0.0.1:5001/utrack-d3efb/us-central1/createPaymentOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        amount: paymentDetails.amount,
+                        currency: 'INR',
+                        description: paymentDetails.description || '',
+                        userId: paymentDetails.userId,
+                        name: paymentDetails.name || '',
+                        email: paymentDetails.email || '',
+                        contact: paymentDetails.contact || ''
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to create order');
+                }
+                
+                console.log('Order created:', data);
+                showStatus('Order created successfully. Opening payment gateway...', 'success');
+                
+                // Initialize payment with the order data
+                initializePayment(data, {
+                    userId: paymentDetails.userId,
+                    name: paymentDetails.name,
+                    email: paymentDetails.email,
+                    contact: paymentDetails.contact
+                });
+                
+            } catch (error) {
+                console.error('Error creating order:', error);
+                showStatus('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Form submission handler
+        document.getElementById('payment-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Disable the button to prevent double submission
+            const button = document.getElementById('pay-button');
+            button.disabled = true;
+            button.textContent = 'Processing...';
+            
+            try {
+                // Get form data
+                const formData = new FormData(this);
+                const paymentDetails = {
+                    amount: parseFloat(formData.get('amount')),
+                    description: formData.get('description'),
+                    userId: formData.get('userId'),
+                    name: formData.get('name'),
+                    email: formData.get('email'),
+                    contact: formData.get('contact')
+                };
+                
+                // Validate amount
+                if (paymentDetails.amount <= 0) {
+                    throw new Error('Amount must be greater than 0');
+                }
+                
+                // Create payment order
+                await createPaymentOrder(paymentDetails);
+                
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+            } finally {
+                // Re-enable the button
+                button.disabled = false;
+                button.textContent = '💳 Pay Now';
+            }
+        });
+
+        // Check if we're coming back from a payment
+        window.addEventListener('load', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('payment') === 'success') {
+                showStatus('Welcome back! Your payment was processed successfully.', 'success');
+            } else if (urlParams.get('payment') === 'failed') {
+                showStatus('Payment was not completed. You can try again.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
