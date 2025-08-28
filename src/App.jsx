@@ -10,6 +10,7 @@ import LandingPage from './pages/LandingPage.jsx';
 import Login from './pages/Login.jsx';
 import SignUp from './pages/SignUp.jsx';
 import SetUp from './pages/SetUp.jsx';
+import PaymentDemoPage from './pages/PaymentDemoPage.jsx';
 import MainLayout from './components/MainLayout.jsx';
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/setup" element={<SetUp />} />
+      <Route path="/payment-demo" element={<PaymentDemoPage />} />
     </Routes>
   )
 }
