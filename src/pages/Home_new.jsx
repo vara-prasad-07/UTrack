@@ -164,27 +164,35 @@ const SpendingCard = ({ keyValue, title, spent, budget, color, percentage }) => 
 
   if (keyValue === "overall") {
     return (
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 w-full hover:bg-white/10 transition-all duration-300 group shadow-lg hover:shadow-xl">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-white/70 text-xs font-medium uppercase tracking-wide">
-            {title}
-          </h3>
-          <div className={`w-2 h-2 rounded-full ${isOverBudget ? 'bg-red-400' : 'bg-green-400'} animate-pulse`}></div>
-        </div>
+      <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex-1 min-w-[200px] relative overflow-hidden group hover:from-white/10 hover:to-white/[0.05] transition-all duration-300">
+        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-2xl"></div>
         
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <div className="text-white text-lg sm:text-base font-bold mb-1">₹{spent}</div>
-            <div className="text-white/50 text-xs">of ₹{budget}</div>
+        <div className="relative">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white/80 text-sm font-medium uppercase tracking-wider">{title}</h3>
+            <div className={`p-2 rounded-lg ${isOverBudget ? 'bg-red-500/20' : 'bg-green-500/20'}`}>
+              <TrendIcon className={`w-4 h-4 ${isOverBudget ? 'text-red-400' : 'text-green-400'}`} />
+            </div>
           </div>
-          <div className="flex-shrink-0">
-            <CircularProgress 
-              percentage={percentage} 
-              color={isOverBudget ? '#f87171' : '#4ade80'} 
-              size={36}
-            />
-            <div className="text-center mt-1">
-              <span className="text-xs text-white/60">{percentage}%</span>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="text-white text-lg font-bold mb-1">₹{spent}</div>
+              <div className="w-full h-[2px] bg-white/20 rounded-full mb-1">
+                <div 
+                  className={`h-full rounded-full transition-all duration-500 ${isOverBudget ? 'bg-red-400' : 'bg-green-400'}`}
+                  style={{ width: `${Math.min(percentage, 100)}%` }}
+                ></div>
+              </div>
+              <div className="text-white/60 text-sm">of ₹{budget}</div>
+            </div>
+            
+            <div className="ml-4">
+              <CircularProgress 
+                percentage={percentage} 
+                color={isOverBudget ? '#f87171' : '#4ade80'} 
+                size={56}
+              />
             </div>
           </div>
         </div>
@@ -193,67 +201,49 @@ const SpendingCard = ({ keyValue, title, spent, budget, color, percentage }) => 
   }
 
   return (
-    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 w-full hover:bg-white/10 transition-all duration-300 group shadow-lg hover:shadow-xl">
-      <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <h3 className="text-white/70 text-xs sm:text-xs font-medium uppercase tracking-wide truncate">
+    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 flex-1 min-w-[160px] hover:bg-white/10 transition-all duration-300 group">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-white/70 text-xs font-medium uppercase tracking-wide">
           {title.replace('_', ' ')}
         </h3>
-        <div className={`w-2 h-2 sm:w-2 sm:h-2 rounded-full ${isOverBudget ? 'bg-red-400' : 'bg-green-400'} animate-pulse flex-shrink-0`}></div>
+        <div className={`w-2 h-2 rounded-full ${isOverBudget ? 'bg-red-400' : 'bg-green-400'} animate-pulse`}></div>
       </div>
       
-      <div className="flex flex-col gap-2 sm:gap-3">
-        <div className="flex items-center justify-between">
-          <div className="flex-1 min-w-0">
-            <div className="text-white text-lg sm:text-base font-bold mb-1 truncate">₹{spent}</div>
-            <div className="text-white/50 text-xs truncate">₹{budget} budget</div>
-          </div>
-          <div className="hidden sm:block flex-shrink-0">
-            <CircularProgress 
-              percentage={percentage} 
-              color={isOverBudget ? '#f87171' : '#4ade80'} 
-              size={40}
-            />
-          </div>
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <div className="text-white text-base font-semibold mb-1">₹{spent}</div>
+          <div className="text-white/50 text-xs">₹{budget} budget</div>
         </div>
-        
-        {/* Mobile progress bar */}
-        <div className="sm:hidden">
-          <div className="flex items-center justify-between text-xs text-white/60 mb-1">
-            <span>Progress</span>
-            <span>{percentage}%</span>
-          </div>
-          <div className="w-full bg-white/10 rounded-full h-1.5">
-            <div 
-              className={`h-1.5 rounded-full transition-all duration-500 ${isOverBudget ? 'bg-red-400' : 'bg-green-400'}`}
-              style={{ width: `${Math.min(percentage, 100)}%` }}
-            ></div>
-          </div>
-        </div>
+        <CircularProgress 
+          percentage={percentage} 
+          color={isOverBudget ? '#f87171' : '#4ade80'} 
+          size={40}
+        />
       </div>
     </div>
   );
 };
 
 const ReceiptItem = ({ amount, type, onViewClick }) => (
-  <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-between min-w-[140px] sm:min-w-[120px] max-w-[160px] sm:max-w-[140px] hover:bg-white/10 transition-all duration-300 group shadow-lg hover:shadow-xl">
-    <div className="flex items-center justify-between w-full mb-4">
-      <Receipt className="w-5 h-5 sm:w-4 sm:h-4 text-white/60" />
-      <div className={`w-3 h-3 sm:w-2 sm:h-2 rounded-full ${type === 'expense' ? 'bg-red-400' : 'bg-green-400'}`}></div>
+  <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 flex flex-col items-center justify-between min-w-[120px] max-w-[140px] hover:bg-white/10 transition-all duration-300 group">
+    <div className="flex items-center justify-between w-full mb-3">
+      <Receipt className="w-4 h-4 text-white/60" />
+      <div className={`w-2 h-2 rounded-full ${type === 'expense' ? 'bg-red-400' : 'bg-green-400'}`}></div>
     </div>
     
-    <div className="text-center mb-4 w-full">
-      <div className="text-xs text-white/60 mb-2">Amount</div>
-      <div className={`text-xl sm:text-lg font-bold ${type === 'expense' ? 'text-red-400' : 'text-green-400'}`}>
+    <div className="text-center mb-3">
+      <div className="text-xs text-white/60 mb-1">Amount</div>
+      <div className={`text-lg font-bold ${type === 'expense' ? 'text-red-400' : 'text-green-400'}`}>
         ₹{amount.total_amount}
       </div>
     </div>
     
     <button
       onClick={onViewClick}
-      className="w-full bg-white/10 hover:bg-white/20 text-white text-sm sm:text-xs py-3 sm:py-2 px-4 sm:px-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 sm:gap-1 font-medium"
+      className="w-full bg-white/10 hover:bg-white/20 text-white text-xs py-2 px-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-1"
     >
-      <Eye className="w-4 h-4 sm:w-3 sm:h-3" />
-      View Receipt
+      <Eye className="w-3 h-3" />
+      View
     </button>
   </div>
 );
@@ -261,42 +251,24 @@ const ReceiptItem = ({ amount, type, onViewClick }) => (
 const ChatItem = ({ is_chat, title, description }) => {
   if (is_chat) {
     return (
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 mb-3 hover:bg-white/10 transition-all duration-300 shadow-lg hover:shadow-xl">
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 mb-3 hover:bg-white/10 transition-all duration-300">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 sm:w-8 sm:h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                <MessageSquare className="w-5 h-5 sm:w-4 sm:h-4 text-white" />
-              </div>
-              <div>
-                <h4 className="text-white font-semibold text-lg sm:text-base">{title}</h4>
-                <div className="text-xs text-white/60 bg-white/10 px-2 py-1 rounded-full mt-1 inline-block">
-                  Active Chat
-                </div>
-              </div>
-            </div>
-            <p className="text-white/80 text-base sm:text-sm leading-relaxed mb-4">{description}</p>
-            <div className="flex gap-2">
-              <button className="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm py-3 sm:py-2 px-4 rounded-xl transition-all duration-300 font-medium">
-                Continue Chat
-              </button>
-              <button className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-sm py-3 sm:py-2 px-4 rounded-xl transition-all duration-300 font-medium">
-                Details
-              </button>
-            </div>
+            <h4 className="text-white font-medium mb-1">{title}</h4>
+            <p className="text-white/60 text-sm leading-relaxed">{description}</p>
           </div>
-          <div className="ml-3">
-            <div className="w-3 h-3 sm:w-2 sm:h-2 rounded-full bg-green-400 animate-pulse"></div>
+          <div className="ml-3 text-white/40">
+            <MessageSquare className="w-5 h-5" />
           </div>
         </div>
       </div>
     );
   } else {
     return (
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 text-center shadow-lg">
-        <MessageSquare className="w-12 h-12 sm:w-8 sm:h-8 text-white/40 mx-auto mb-4 sm:mb-3" />
-        <p className="text-xl sm:text-lg font-semibold mb-3 sm:mb-2 text-white">No Chat Logs</p>
-        <p className="text-base sm:text-sm text-white/60 max-w-md mx-auto">
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 text-center">
+        <MessageSquare className="w-8 h-8 text-white/40 mx-auto mb-3" />
+        <p className="text-lg font-semibold mb-2 text-white">No Chat Logs</p>
+        <p className="text-sm text-white/60">
           Use our <span className="text-blue-400 font-medium">advanced AI-budget-planner</span> tool to get started!
         </p>
       </div>
@@ -317,7 +289,6 @@ const Home = () => {
   const containerRef = useRef(null);
   const cardsRef = useRef(null);
 
-  // All hooks must be called before any conditional returns
   useGSAP(() => {
     if (containerRef.current && !loading) {
       const cards = containerRef.current.querySelectorAll('.spending-card');
@@ -376,9 +347,30 @@ const Home = () => {
     return () => unsubscribe();
   }, []);
 
-  // Calculate data only when userData is available
-  const budget = userData?.userdetails?.budget || 0;
-  const bills = userData?.user_bills || [];
+  const openModal = (html) => {
+    setModalHtml(html);
+  };
+
+  const closeModal = () => {
+    setModalHtml(null);
+  };
+
+  if (loading) return <SkeletonLayout />;
+  
+  if (!userData) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">No Data Found</h2>
+          <p className="text-gray-400">Please complete your setup first.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate spending data
+  const budget = userData.userdetails?.budget || 0;
+  const bills = userData.user_bills || [];
   
   const calculateTotal = (bills) => {
     return bills.reduce((sum, bill) => {
@@ -464,54 +456,32 @@ const Home = () => {
     }
   }, [userData, useruid, budget, total, todaySpent, weekSpent, monthSpent]);
 
-  const openModal = (html) => {
-    setModalHtml(html);
-  };
-
-  const closeModal = () => {
-    setModalHtml(null);
-  };
-
-  // Early returns after all hooks have been called
-  if (loading) return <SkeletonLayout />;
-  
-  if (!userData) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">No Data Found</h2>
-          <p className="text-gray-400">Please complete your setup first.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div ref={containerRef}>
       <DashboardBackground />
       <div className="min-h-screen relative z-10 text-white">
-        <div className="px-4 sm:px-6 py-4 sm:py-6 max-w-md sm:max-w-7xl mx-auto">
+        <div className="container mx-auto px-4 py-6 max-w-6xl">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 sm:p-6 mb-4 sm:mb-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-lg">
+          <div className="flex items-center justify-between p-6 pt-6 mb-8">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <div className="w-5 h-5 sm:w-5 sm:h-5 bg-white rounded-full"></div>
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-5 h-5 bg-white rounded-full"></div>
               </div>
-              <span className="text-xl sm:text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">UTrack</span>
+              <span className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">UTrack</span>
             </div>
             <div className="text-right">
-              <div className="text-xs sm:text-sm text-white/60">Welcome back,</div>
-              <div className="text-sm sm:text-base font-semibold text-white truncate max-w-[100px] sm:max-w-none">{userData?.userdetails?.name || 'User'}</div>
+              <div className="text-sm text-white/60">Welcome back,</div>
+              <div className="text-lg font-semibold text-white">{userData?.userdetails?.name || 'User'}</div>
             </div>
           </div>
 
           {/* Spending Overview */}
-          <div className="mb-6 sm:mb-8">
-            <h2 className="text-xl sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2 px-1">
-              <PieChart className="w-6 h-6 sm:w-6 sm:h-6 text-blue-400" />
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+              <PieChart className="w-6 h-6 text-blue-400" />
               Spending Overview
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-4">
+            <div className="flex flex-wrap gap-4">
               {Object.entries(data).map(([key, values], index) => (
                 <div key={index} className="spending-card">
                   <SpendingCard
@@ -528,22 +498,21 @@ const Home = () => {
           </div>
 
           {/* Recent Receipts */}
-          <div className="mb-6 sm:mb-8">
-            <div className="flex items-center justify-between mb-4 sm:mb-6 px-1">
-              <h2 className="text-xl sm:text-xl font-bold text-white flex items-center gap-2">
-                <Receipt className="w-6 h-6 sm:w-6 sm:h-6 text-green-400" />
-                Recent receipts
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                <Receipt className="w-6 h-6 text-green-400" />
+                Recent Receipts
               </h2>
-              <button className="text-white/60 text-sm hover:text-white transition-colors flex items-center gap-1 bg-white/10 px-3 py-2 rounded-xl hover:bg-white/20">
-                <span className="hidden sm:inline">view all</span>
-                <span className="sm:hidden">view all</span>
+              <button className="text-white/60 text-sm hover:text-white transition-colors flex items-center gap-1">
+                <span>View All</span>
                 <ArrowUpRight className="w-4 h-4" />
               </button>
             </div>
-            <div className="flex gap-4 overflow-x-auto pb-4 px-2 hide-scrollbar">
+            <div className="flex gap-4 overflow-x-auto pb-2 hide-scrollbar">
               {Array.isArray(bills) && bills.length > 0 ? (
                 bills.slice().reverse().map((bill, index) => (
-                  <div key={index} className="receipt-item flex-shrink-0">
+                  <div key={index} className="receipt-item">
                     <ReceiptItem 
                       amount={bill["json"]} 
                       type="expense" 
@@ -552,10 +521,10 @@ const Home = () => {
                   </div>
                 ))
               ) : (
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 text-center w-full shadow-lg">
-                  <Receipt className="w-12 h-12 sm:w-8 sm:h-8 text-white/40 mx-auto mb-4 sm:mb-3" />
-                  <p className="text-xl sm:text-lg font-semibold mb-3 sm:mb-2 text-white">No receipts added yet</p>
-                  <p className="text-base sm:text-sm text-white/60 max-w-md mx-auto">
+                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 text-center min-w-[300px]">
+                  <Receipt className="w-8 h-8 text-white/40 mx-auto mb-3" />
+                  <p className="text-lg font-semibold mb-2 text-white">No receipts added yet</p>
+                  <p className="text-sm text-white/60">
                     Use our <span className="text-blue-400 font-medium">advanced receipt scanning</span> tool to get started!
                   </p>
                 </div>
@@ -565,64 +534,56 @@ const Home = () => {
 
           {/* Modal */}
           {modalHtml && (
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-              <div className="bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-auto relative shadow-2xl">
-                <div className="sticky top-0 bg-black/90 backdrop-blur-xl border-b border-white/10 p-4 flex items-center justify-between">
-                  <h3 className="text-white font-semibold text-lg">Receipt Details</h3>
-                  <button
-                    onClick={closeModal}
-                    className="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 touch-target"
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className="p-4 sm:p-6">
-                  <div dangerouslySetInnerHTML={{ __html: modalHtml }} />
-                </div>
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+              <div className="bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl max-w-full max-h-[90vh] overflow-auto relative p-6 shadow-2xl">
+                <button
+                  onClick={closeModal}
+                  className="absolute top-4 right-4 text-white/60 hover:text-white text-xl font-bold w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all duration-300"
+                >
+                  ×
+                </button>
+                <div dangerouslySetInnerHTML={{ __html: modalHtml }} />
               </div>
             </div>
           )}
 
           {/* Recent Chat */}
-          <div className="mb-20 sm:mb-24">
-            <div className="flex items-center justify-between mb-4 sm:mb-6 px-1">
-              <h2 className="text-xl sm:text-xl font-bold text-white flex items-center gap-2">
-                <MessageSquare className="w-6 h-6 sm:w-6 sm:h-6 text-purple-400" />
-                Recent chat
+          <div className="mb-20">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                <MessageSquare className="w-6 h-6 text-purple-400" />
+                Recent Chat
               </h2>
-              <button className="text-white/60 text-sm hover:text-white transition-colors flex items-center gap-1 bg-white/10 px-3 py-2 rounded-xl hover:bg-white/20">
-                <span className="hidden sm:inline">view all</span>
-                <span className="sm:hidden">view all</span>
+              <button className="text-white/60 text-sm hover:text-white transition-colors flex items-center gap-1">
+                <span>View All</span>
                 <ArrowUpRight className="w-4 h-4" />
               </button>
             </div>
             
             {chats ? (
-              <div className="space-y-3 sm:space-y-4 px-2">
+              <div className="space-y-4">
                 {dbchats.map((chat, index) => (
                   <div
                     key={index}
-                    className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-6 cursor-pointer hover:bg-white/10 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 cursor-pointer hover:bg-white/10 transition-all duration-300"
                     onClick={() => console.log("clicked")}
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs text-white/60 bg-white/10 px-3 py-1 rounded-full">{chat.timestamp}</span>
-                      <MessageSquare className="w-5 h-5 sm:w-4 sm:h-4 text-white/40" />
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-white/60">{chat.timestamp}</span>
+                      <MessageSquare className="w-4 h-4 text-white/40" />
                     </div>
                     {dbchats[index].chat[0]?.user && (
-                      <p className="text-white/80 text-base sm:text-sm leading-relaxed">{chat.chat[0].user.substring(0, 80)}...</p>
+                      <p className="text-white/80 text-sm">{chat.chat[0].user.substring(0, 80)}...</p>
                     )}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="px-2">
-                <ChatItem
-                  is_chat={userData?.chatLogs != null}
-                  title="Food & Delivery"
-                  description="You spent ₹2,350 on food delivery this week 🍕 — that's 15% more than last week. Want to set a weekly limit?"
-                />
-              </div>
+              <ChatItem
+                is_chat={userData?.chatLogs != null}
+                title="Food & Delivery"
+                description="You spent ₹2,350 on food delivery this week 🍕 — that's 15% more than last week. Want to set a weekly limit?"
+              />
             )}
           </div>
         </div>
