@@ -219,9 +219,15 @@ const You = () => {
                   <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-black"></div>
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-white font-bold text-xl mb-1">
-                    {userData.userdetails?.name || 'User'}
-                  </h1>
+                  <div className="flex items-center gap-3 mb-1">
+                    <h1 className="text-white font-bold text-xl">
+                      {userData.userdetails?.name || 'User'}
+                    </h1>
+                    <div className="flex items-center gap-1 text-green-400 text-sm font-semibold">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      Active
+                    </div>
+                  </div>
                   <div className="flex items-center gap-2 text-white/60 text-sm mb-2">
                     <Mail className="w-4 h-4" />
                     {userData.userdetails?.email || 'user@example.com'}
@@ -229,12 +235,6 @@ const You = () => {
                   <div className="flex items-center gap-2 text-blue-400 text-xs">
                     <Calendar className="w-3 h-3" />
                     Member since {new Date().getFullYear()}
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="flex items-center gap-1 text-green-400 text-sm font-semibold mb-1">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    Active
                   </div>
                 </div>
               </div>

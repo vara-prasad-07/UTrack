@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import BottomNav from '../components/BottomNav';
 import { auth, db } from '../firebase';
 import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
@@ -42,6 +42,51 @@ const TypingAnimation = () => (
   </div>
 );
 
+// Memoized Message Component to prevent unnecessary re-renders
+const MessagePair = React.memo(({ message, index, isLast, isTyping }) => (
+  <div className="message-pair space-y-4">
+    {/* User message */}
+    <div className="flex justify-end">
+      <div className="max-w-xs lg:max-w-md xl:max-w-lg">
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl rounded-br-md p-4 shadow-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <User className="w-4 h-4" />
+            <span className="text-xs opacity-80">You</span>
+          </div>
+          <p className="text-sm leading-relaxed">{message.user}</p>
+        </div>
+      </div>
+    </div>
+    
+    {/* Chatbot message or typing animation */}
+    {message.chatbot ? (
+      <div className="flex justify-start">
+        <div className="max-w-xs lg:max-w-md xl:max-w-lg">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-2xl rounded-bl-md p-4 shadow-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Bot className="w-4 h-4 text-blue-400" />
+              <span className="text-xs text-blue-400">AI Assistant</span>
+            </div>
+            <p className="text-sm leading-relaxed text-white/90">{message.chatbot}</p>
+          </div>
+        </div>
+      </div>
+    ) : isLast && isTyping && (
+      <div className="flex justify-start">
+        <div className="max-w-xs lg:max-w-md xl:max-w-lg">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-2xl rounded-bl-md p-4 shadow-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Bot className="w-4 h-4 text-blue-400" />
+              <span className="text-xs text-blue-400">AI Assistant</span>
+            </div>
+            <TypingAnimation />
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+));
+
 const Ask = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chats, setChats] = useState([]);
@@ -56,9 +101,20 @@ const Ask = () => {
   const [isChats, setIsChats] = useState(false);
   const [dbchats, setDbChats] = useState(null);
   const [isDesktop, setIsDesktop] = useState(false);
-  const uid = auth.currentUser.uid;
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // GSAP Animations
+  // Check authentication state
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // GSAP Animations - Only run once on mount
   useGSAP(() => {
     const tl = gsap.timeline();
     
@@ -66,17 +122,12 @@ const Ask = () => {
       { y: -30, opacity: 0 }, 
       { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }
     )
-    .fromTo('.message-pair', 
-      { y: 20, opacity: 0 }, 
-      { y: 0, opacity: 1, duration: 0.4, stagger: 0.1, ease: 'power3.out' }, 
-      '-=0.3'
-    )
     .fromTo('.input-area', 
       { y: 30, opacity: 0 }, 
       { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }, 
       '-=0.2'
     );
-  }, { scope: containerRef, dependencies: [chats] });
+  }, { scope: containerRef });
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -113,27 +164,45 @@ const Ask = () => {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  const userChatDb= async()=>{
-    try {
-            const userRef = doc(db, 'users', uid);
-            const docSnap = await getDoc(userRef);
-            
-            if (docSnap.exists()) {
-              setIsChats(true)
-              setDbChats(docSnap.data().user_chats);
-              
-              console.log("retrieved successfully");
-            } else {
-              console.log("No user data found in Firestore");
-            }
-          } catch (err) {
-            console.error("Error fetching user data:", err);
-          }
-
+  const userChatDb = async () => {
+    if (!user?.uid) return;
     
-  }
-  userChatDb();
-  console.log(username)
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(userRef);
+      
+      if (docSnap.exists()) {
+        setIsChats(true);
+        setDbChats(docSnap.data().user_chats);
+        console.log("retrieved successfully");
+      } else {
+        console.log("No user data found in Firestore");
+      }
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      
+      // Handle specific Firebase errors
+      if (err.message?.includes('ERR_BLOCKED_BY_CLIENT')) {
+        console.warn('Firebase blocked by browser/extension. Chat history may not be available.');
+        // Continue without chat history rather than failing completely
+        setIsChats(false);
+        setDbChats([]);
+      } else if (err.code === 'permission-denied') {
+        console.error('Firebase permission denied. Check Firestore rules.');
+      } else if (err.code === 'unavailable') {
+        console.error('Firebase service temporarily unavailable.');
+      }
+    }
+  };
+
+  // Call userChatDb when user is available
+  useEffect(() => {
+    if (user?.uid) {
+      userChatDb();
+    }
+  }, [user]);
+
+  console.log(username);
 
   const simulateTyping = (text, callback) => {
     setIsTyping(true);
@@ -152,83 +221,146 @@ const Ask = () => {
     }, 50);
   };
 
-  const getData = async (message) => {
-    if (!message) return "No message provided";
+  const getData = async (message, retryCount = 0) => {
+    if (!message || !user?.uid) return "No message provided or user not authenticated";
   
     try {
+      // Add request timeout using AbortController
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds
+      
       const res = await fetch('https://bill-assistant-1.onrender.com/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message,uid })
+        body: JSON.stringify({ message, uid: user.uid }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
+      
+      // Handle specific HTTP status codes
+      if (res.status === 500) {
+        if (retryCount < 2) {
+          // Retry up to 2 times for server errors with exponential backoff
+          const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s delays
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return getData(message, retryCount + 1);
+        }
+        return "🚫 **Server Error**: Our AI assistant is temporarily experiencing technical difficulties. This usually resolves within a few minutes. Please try again shortly, or contact support if the issue persists.";
+      }
+      
+      if (res.status === 503) {
+        return "🔧 **Service Unavailable**: The AI service is temporarily down for maintenance. Please try again in a few minutes.";
+      }
+      
+      if (res.status === 429) {
+        return "⏰ **Rate Limited**: Too many requests. Please wait a moment before sending another message.";
+      }
+      
+      if (!res.ok) {
+        return `🚫 **Service Error** (${res.status}): The AI assistant is having trouble responding. Please try again or contact support if this continues.`;
+      }
   
       const text = await res.text();
-  
+      
       try {
         const json = JSON.parse(text);
         if (json.success) {
           return json.response;
         } else {
-          return `Server error: ${json.error || "Unknown error"}`;
+          return `🤖 **AI Assistant**: ${json.error || "I'm having trouble processing your request. Please try rephrasing your question or try again."}`;
         }
       } catch (jsonErr) {
-        return `Failed to parse JSON: ${text}`;
+        console.error('JSON parsing error:', jsonErr);
+        return `🚫 **Communication Error**: Unable to understand the server response. Please try again or contact support.`;
       }
   
     } catch (fetchErr) {
-      return `Network error: ${fetchErr.message}`;
+      console.error('Fetch error:', fetchErr);
+      
+      if (fetchErr.name === 'AbortError') {
+        return "⏱️ **Request Timeout**: The request took too long to complete. Please check your connection and try again.";
+      }
+      
+      if (fetchErr.name === 'TypeError' && fetchErr.message.includes('Failed to fetch')) {
+        return "🌐 **Connection Error**: Unable to reach the AI service. Please check your internet connection and try again.";
+      }
+      
+      if (fetchErr.message.includes('ERR_BLOCKED_BY_CLIENT')) {
+        return "🔒 **Browser Block**: Your browser or an extension is blocking the request. Please disable ad blockers or try a different browser.";
+      }
+      
+      return `🚫 **Network Error**: ${fetchErr.message}. Please check your connection and try again.`;
     }
   };
   
 
-  const handleSendMessage = async () => {
-  const trimmedMessage = inputValue.trim();
-  if (trimmedMessage === '') return;
+  const handleSendMessage = useCallback(async () => {
+    const trimmedMessage = inputValue.trim();
+    if (trimmedMessage === '') return;
 
-  // Step 1: Show user message instantly
-  const userMessage = { user: trimmedMessage, chatbot: null };
-  const newChats = [...chats, userMessage];
-  setChats(newChats);
-  
-  // Step 2: Clear input and set typing state
-  setInputValue('');
-  setIsTyping(true);
-  console.log("User new chat", newChats);
-  // Step 3: Update allChats state for current chat index
-  const updatedAllChats = [...allChats];
-  updatedAllChats[currentChatIndex] = newChats;
-  console.log("Updated allChats:", updatedAllChats);
-  setAllChats(updatedAllChats);
+    // Clear input immediately for better UX
+    setInputValue('');
 
-  // Step 4: Fetch API response
-  const response = await getData(trimmedMessage);
+    // Step 1: Show user message instantly
+    const userMessage = { user: trimmedMessage, chatbot: null };
+    const newChats = [...chats, userMessage];
+    setChats(newChats);
+    
+    // Step 2: Set typing state
+    setIsTyping(true);
+    
+    // Step 3: Update allChats state for current chat index
+    const updatedAllChats = [...allChats];
+    updatedAllChats[currentChatIndex] = newChats;
+    setAllChats(updatedAllChats);
 
-  // Step 5: Replace the last message with the bot response
-  const updatedLastMessage = { ...userMessage, chatbot: response };
-  const updatedChats = [...newChats.slice(0, -1), updatedLastMessage];
-  setChats(updatedChats);
-  setIsTyping(false);
+    try {
+      // Step 4: Fetch API response
+      const response = await getData(trimmedMessage);
 
-  // Step 6: Update allChats again
-  const updatedAllChatsWithResponse = [...updatedAllChats];
-  updatedAllChatsWithResponse[currentChatIndex] = updatedChats;
-  setAllChats(updatedAllChatsWithResponse);
-  console.log("Updated allChats with response:", updatedAllChatsWithResponse);
-};
+      // Step 5: Update the message with bot response
+      const updatedMessage = { ...userMessage, chatbot: response };
+      const updatedChats = [...newChats.slice(0, -1), updatedMessage];
+      
+      // Update both chats and allChats atomically to prevent flicker
+      setChats(updatedChats);
+      const finalAllChats = [...updatedAllChats];
+      finalAllChats[currentChatIndex] = updatedChats;
+      setAllChats(finalAllChats);
+      
+    } catch (error) {
+      console.error("Error getting response:", error);
+      const errorMessage = { 
+        ...userMessage, 
+        chatbot: "🚫 I'm having trouble connecting to the AI service right now. This might be due to high traffic or server maintenance. Please try again in a moment, or contact support if the issue persists." 
+      };
+      const errorChats = [...newChats.slice(0, -1), errorMessage];
+      setChats(errorChats);
+      
+      const errorAllChats = [...updatedAllChats];
+      errorAllChats[currentChatIndex] = errorChats;
+      setAllChats(errorAllChats);
+    } finally {
+      setIsTyping(false);
+    }
+  }, [inputValue, chats, allChats, currentChatIndex, user]);
+
 const saveChats = async () => {
-  if (allChats[currentChatIndex].length === 0) {
-    alert('No chats to save.');
+  if (!user?.uid || allChats[currentChatIndex].length === 0) {
+    alert('No chats to save or user not authenticated.');
     return;
   }
 
-  const userRef = doc(db, "users", uid);
+  const userRef = doc(db, "users", user.uid);
   const chatData = {
     chat: allChats[currentChatIndex],
     timestamp: new Date().toISOString(),
   };
   console.log("Saving chat data:", chatData);
+  
   try {
     await updateDoc(userRef, {
       user_chats: arrayUnion(chatData)
@@ -237,7 +369,17 @@ const saveChats = async () => {
     alert('Chat saved successfully!');
   } catch (error) {
     console.error("Error saving chat:", error);
-    alert('Failed to save chat. Please try again.');
+    
+    // Handle specific Firebase errors
+    if (error.message?.includes('ERR_BLOCKED_BY_CLIENT')) {
+      alert('⚠️ Unable to save chat: Your browser or an extension is blocking the connection to Firebase. Please disable ad blockers or try a different browser.');
+    } else if (error.code === 'permission-denied') {
+      alert('❌ Permission denied: Unable to save chat. Please contact support.');
+    } else if (error.code === 'unavailable') {
+      alert('🔄 Service temporarily unavailable: Please try saving again in a moment.');
+    } else {
+      alert('Failed to save chat. Please try again or contact support if the issue persists.');
+    }
   }
 }
 
@@ -256,6 +398,40 @@ const saveChats = async () => {
   // Console log the chats for debugging
 
 console.log(allChats)
+
+  // Show loading screen while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <Bot className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-white/70 text-lg">Loading chat...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Bot className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-white/70 text-lg mb-4">Please log in to access the chat</p>
+          <button 
+            onClick={() => window.location.href = '/login'}
+            className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} className="min-h-screen">
@@ -388,50 +564,13 @@ console.log(allChats)
             ) : (
               <div className="space-y-6">
                 {chats.map((message, index) => (
-                  <div key={index} className="message-pair space-y-4">
-                    {/* User message */}
-                    <div className="flex justify-end">
-                      <div className="max-w-xs lg:max-w-md xl:max-w-lg">
-                        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl rounded-br-md p-4 shadow-lg">
-                          <div className="flex items-center gap-2 mb-2">
-                            <User className="w-4 h-4" />
-                            <span className="text-xs opacity-80">You</span>
-                          </div>
-                          <p className="text-sm leading-relaxed">{message.user}</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Chatbot message */}
-                    {message.chatbot && (
-                      <div className="flex justify-start">
-                        <div className="max-w-xs lg:max-w-md xl:max-w-lg">
-                          <div className="bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-2xl rounded-bl-md p-4 shadow-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Bot className="w-4 h-4 text-blue-400" />
-                              <span className="text-xs text-blue-400">AI Assistant</span>
-                            </div>
-                            <p className="text-sm leading-relaxed text-white/90">{message.chatbot}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Typing animation */}
-                    {index === chats.length - 1 && !message.chatbot && isTyping && (
-                      <div className="flex justify-start">
-                        <div className="max-w-xs lg:max-w-md xl:max-w-lg">
-                          <div className="bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-2xl rounded-bl-md p-4 shadow-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Bot className="w-4 h-4 text-blue-400" />
-                              <span className="text-xs text-blue-400">AI Assistant</span>
-                            </div>
-                            <TypingAnimation />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <MessagePair
+                    key={`${index}-${message.user}`}
+                    message={message}
+                    index={index}
+                    isLast={index === chats.length - 1}
+                    isTyping={isTyping}
+                  />
                 ))}
               </div>
             )}

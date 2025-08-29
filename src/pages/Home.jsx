@@ -118,7 +118,13 @@ function DashboardBackground() {
 const CircularProgress = ({ percentage, color, size = 48 }) => {
   const radius = 18;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+  
+  // Safely handle percentage for display and calculation
+  const safePercentage = Math.max(0, Math.min(percentage || 0, 100)); // Cap at 100% for visual
+  const displayPercentage = isFinite(percentage) && percentage !== null ? 
+    (percentage > 999 ? '999+' : Math.round(percentage * 10) / 10) : 0;
+  
+  const strokeDashoffset = circumference - (safePercentage / 100) * circumference;
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -151,7 +157,7 @@ const CircularProgress = ({ percentage, color, size = 48 }) => {
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
         <span className="text-xs font-semibold text-white">
-          {percentage > 999 ? '999+' : percentage}%
+          {displayPercentage}%
         </span>
       </div>
     </div>
@@ -184,7 +190,9 @@ const SpendingCard = ({ keyValue, title, spent, budget, color, percentage }) => 
               size={36}
             />
             <div className="text-center mt-1">
-              <span className="text-xs text-white/60">{percentage}%</span>
+              <span className="text-xs text-white/60">
+                {isFinite(percentage) ? (percentage > 999 ? '999+' : Math.round(percentage * 10) / 10) : 0}%
+              </span>
             </div>
           </div>
         </div>
@@ -220,12 +228,14 @@ const SpendingCard = ({ keyValue, title, spent, budget, color, percentage }) => 
         <div className="sm:hidden">
           <div className="flex items-center justify-between text-xs text-white/60 mb-1">
             <span>Progress</span>
-            <span>{percentage}%</span>
+            <span>
+              {isFinite(percentage) ? (percentage > 999 ? '999+' : Math.round(percentage * 10) / 10) : 0}%
+            </span>
           </div>
           <div className="w-full bg-white/10 rounded-full h-1.5">
             <div 
               className={`h-1.5 rounded-full transition-all duration-500 ${isOverBudget ? 'bg-red-400' : 'bg-green-400'}`}
-              style={{ width: `${Math.min(percentage, 100)}%` }}
+              style={{ width: `${Math.min(Math.max(percentage || 0, 0), 100)}%` }}
             ></div>
           </div>
         </div>
@@ -317,6 +327,13 @@ const Home = () => {
   const containerRef = useRef(null);
   const cardsRef = useRef(null);
 
+  // Update calculations when userData changes
+  useEffect(() => {
+    if (userData && useruid) {
+      updateUserSpendings();
+    }
+  }, [userData, useruid]);
+
   // All hooks must be called before any conditional returns
   useGSAP(() => {
     if (containerRef.current && !loading) {
@@ -377,14 +394,17 @@ const Home = () => {
   }, []);
 
   // Calculate data only when userData is available
-  const budget = userData?.userdetails?.budget || 0;
+  const budget = userData?.usersettings?.montly_budget || 0; // Fixed: use usersettings.montly_budget
   const bills = userData?.user_bills || [];
   
   const calculateTotal = (bills) => {
     return bills.reduce((sum, bill) => {
       const amount = bill.json?.total_amount;
       if (typeof amount === "string") {
-        return sum + parseFloat(amount.replace(/[^\d.-]/g, '')) || 0;
+        const digits = amount.match(/\d+(\.\d+)?/);
+        if (digits) {
+          return sum + parseFloat(digits[0]);
+        }
       } else if (typeof amount === "number") {
         return sum + amount;
       }
@@ -392,48 +412,130 @@ const Home = () => {
     }, 0);
   };
 
-  const now = new Date();
-  const today = now.toDateString();
-  const currentWeekStart = new Date(now.setDate(now.getDate() - now.getDay()));
-  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  // Parse flexible date formats from the original code
+  function parseFlexibleDate(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') return null;
 
-  const todayBills = bills.filter(bill => new Date(bill.date).toDateString() === today);
-  const weekBills = bills.filter(bill => new Date(bill.date) >= currentWeekStart);
-  const monthBills = bills.filter(bill => new Date(bill.date) >= currentMonthStart);
+    // Try ISO first
+    let parsed = new Date(dateStr);
+    if (!isNaN(parsed)) return parsed;
 
-  const total = calculateTotal(bills);
-  const todaySpent = calculateTotal(todayBills);
-  const weekSpent = calculateTotal(weekBills);
-  const monthSpent = calculateTotal(monthBills);
+    // Try DD/MM/YYYY HH:mm
+    const slashMatch = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?$/);
+    if (slashMatch) {
+      const [, dd, mm, yyyy, hh = "00", min = "00"] = slashMatch;
+      return new Date(`${yyyy}-${mm}-${dd}T${hh}:${min}:00`);
+    }
 
+    // Try DD-MM-YYYY HH:mm:ss AM/PM
+    const dashMatch = dateStr.match(/^(\d{2})-(\d{2})-(\d{4})\s+(\d{2}):(\d{2}):(\d{2})\s+(AM|PM)$/i);
+    if (dashMatch) {
+      let [, dd, mm, yyyy, hh, min, sec, ampm] = dashMatch;
+      hh = parseInt(hh);
+      if (ampm.toUpperCase() === "PM" && hh !== 12) hh += 12;
+      if (ampm.toUpperCase() === "AM" && hh === 12) hh = 0;
+      return new Date(`${yyyy}-${mm}-${dd}T${String(hh).padStart(2, '0')}:${min}:${sec}`);
+    }
+
+    return null;
+  }
+
+  // Original working calculation logic
+  function calculateSpendingByTime(userbill) {
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday start
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    let total = 0, today = 0, week = 0, month = 0;
+
+    for (const bill of userbill) {
+      const amountRaw = bill?.json?.total_amount;
+      const dateStr = bill?.json?.time_stamp;
+
+      if (!amountRaw || !dateStr) continue;
+
+      const amount = typeof amountRaw === "string"
+        ? parseFloat(amountRaw.match(/\d+(\.\d+)?/)?.[0] || 0)
+        : amountRaw;
+
+      if (isNaN(amount)) continue;
+
+      const billDate = parseFlexibleDate(dateStr);
+      if (!billDate || isNaN(billDate)) continue;
+
+      total += amount;
+
+      if (billDate.toISOString().slice(0, 10) === todayStr) {
+        today += amount;
+      }
+
+      if (billDate >= startOfWeek && billDate <= now) {
+        week += amount;
+      }
+
+      if (billDate >= startOfMonth && billDate <= now) {
+        month += amount;
+      }
+    }
+
+    return { total, today, week, month };
+  }
+
+  // Get spending data using original logic
+  const { total, today, week, month } = calculateSpendingByTime(bills || []);
+
+  console.log('Debug - Spending data:', {
+    today,
+    week,
+    month,
+    total,
+    budget,
+    budgetSource: userData?.usersettings?.montly_budget
+  });
+
+  // Original working data structure with corrected percentage calculations
   const data = {
-    This_Month: { 
-      spent: Math.round(monthSpent), 
-      budget: budget, 
-      percentage: Math.round((monthSpent / budget) * 100) || 0
+    Today: { 
+      spent: today, 
+      budget: budget > 0 ? parseInt(budget / 30) : 0, 
+      percentage: budget > 0 ? parseInt((today / (budget / 30)) * 100) : 0
     },
     This_week: { 
-      spent: Math.round(weekSpent), 
-      budget: Math.round(budget / 4), 
-      percentage: Math.round((weekSpent / (budget / 4)) * 100) || 0
+      spent: week, 
+      budget: budget > 0 ? parseInt(budget / 4) : 0, 
+      percentage: budget > 0 ? parseInt((week / (budget / 4)) * 100) : 0
     },
-    Today: { 
-      spent: Math.round(todaySpent), 
-      budget: Math.round(budget / 30), 
-      percentage: Math.round((todaySpent / (budget / 30)) * 100) || 0
+    This_Month: { 
+      spent: month, 
+      budget: budget, 
+      percentage: budget > 0 ? parseInt((month / budget) * 100) : 0
     },
     overall: { 
-      spent: Math.round(total), 
+      spent: total, 
       budget: budget, 
-      percentage: Math.round((total / budget) * 100) || 0
+      percentage: budget > 0 ? parseInt((total / budget) * 100) : 0
     }
   };
 
   const userSpendings = {
-    today: { spent: todaySpent, budget: Math.round(budget / 30) },
-    this_week: { spent: weekSpent, budget: Math.round(budget / 4) },
-    this_month: { spent: monthSpent, budget: budget },
-    overall: { spent: total, budget: budget }
+    today: { 
+      spent: today, 
+      budget: budget > 0 ? parseInt(budget / 30) : 0 
+    },
+    this_week: { 
+      spent: week, 
+      budget: budget > 0 ? parseInt(budget / 4) : 0 
+    },
+    this_month: { 
+      spent: month, 
+      budget: budget 
+    },
+    overall: { 
+      spent: total, 
+      budget: budget 
+    }
   };
 
   const updateUserSpendings = async () => {
@@ -462,7 +564,7 @@ const Home = () => {
     if (userData && useruid && budget) {
       updateUserSpendings();
     }
-  }, [userData, useruid, budget, total, todaySpent, weekSpent, monthSpent]);
+  }, [userData, useruid, budget, total, today, week, month]);
 
   const openModal = (html) => {
     setModalHtml(html);
@@ -504,6 +606,21 @@ const Home = () => {
               <div className="text-sm sm:text-base font-semibold text-white truncate max-w-[100px] sm:max-w-none">{userData?.userdetails?.name || 'User'}</div>
             </div>
           </div>
+
+          {/* Budget Warning */}
+          {budget <= 0 && (
+            <div className="mb-6 sm:mb-8 bg-yellow-500/10 backdrop-blur-xl border border-yellow-500/20 rounded-2xl p-4 shadow-lg">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                <div>
+                  <h3 className="text-yellow-200 font-semibold text-sm">No Budget Set</h3>
+                  <p className="text-yellow-300/80 text-xs mt-1">
+                    Set a monthly budget to track your spending progress accurately.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Spending Overview */}
           <div className="mb-6 sm:mb-8">
