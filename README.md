@@ -74,12 +74,29 @@
 - **npm** or **yarn**
 - **Firebase CLI**
 - **Git**
+## 📱 Application Screenshots
+
+**Dashboard Screen**
+
+![WhatsApp Image 2025-08-29 at 12 30 48_7d7170ca](https://github.com/user-attachments/assets/03887fcf-2ef4-4670-a719-52d22d5fd2bd)
+
+
+**AI Agent Chat screen and result**
+
+![WhatsApp Image 2025-08-29 at 12 33 24_7d88d07b](https://github.com/user-attachments/assets/9f175213-b3bf-40b9-ace3-cb41140eeba0)
+
+
+**Physical bill to virtual bill by scanning bill with mobile camera**
+
+![WhatsApp Image 2025-08-29 at 12 32 32_f7d2f73e](https://github.com/user-attachments/assets/25c3134b-3825-459d-babf-aa5cd5bd8f70)
+
+
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/PATTASWAMY-VISHWAK-YASASHREE/UTrack.git
+   git clone https://github.com/your-user-name/UTrack.git
    cd UTrack
    ```
 
