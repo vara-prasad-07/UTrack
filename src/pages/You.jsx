@@ -44,6 +44,12 @@ const CircularProgress = ({ percentage, color, size = 48 }) => {
   const radius = 18;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
+  
+  // Format percentage to maximum 2 decimal places, removing unnecessary trailing zeros
+  const formatPercentage = (value) => {
+    const rounded = Math.round(value * 100) / 100; // Round to 2 decimal places
+    return rounded % 1 === 0 ? rounded.toString() : rounded.toFixed(2).replace(/\.?0+$/, '');
+  };
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -75,7 +81,7 @@ const CircularProgress = ({ percentage, color, size = 48 }) => {
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-xs font-bold text-white">{percentage}%</span>
+        <span className="text-xs font-bold text-white">{formatPercentage(percentage)}%</span>
       </div>
     </div>
   );
