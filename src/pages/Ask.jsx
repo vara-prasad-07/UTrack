@@ -17,68 +17,52 @@ import {
   Zap
 } from 'lucide-react';
 
-// Modern Chat Background
+// Professional Chat Background
 function ChatBackground() {
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 -z-10">
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-900/10 to-purple-900/10"></div>
-      </div>
-      <div className="absolute top-20 left-10 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse"></div>
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse"></div>
+    <div className="fixed inset-0 bg-white dark:bg-gray-900 -z-10">
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800"></div>
     </div>
   );
 }
 
-// Modern Typing Animation
+// Professional Typing Animation
 const TypingAnimation = () => (
-  <div className="flex items-center space-x-1 p-3">
+  <div className="flex items-center space-x-2 p-4">
     <div className="flex space-x-1">
-      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+      <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></div>
+      <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+      <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
     </div>
-    <span className="text-white/60 text-sm ml-2">AI is thinking...</span>
+    <span className="text-gray-500 dark:text-gray-400 text-sm">Finzi is typing...</span>
   </div>
 );
 
-// Memoized Message Component to prevent unnecessary re-renders
+// Professional Message Component
 const MessagePair = React.memo(({ message, index, isLast, isTyping }) => (
-  <div className="message-pair space-y-4">
+  <div className="message-pair space-y-6 py-4">
     {/* User message */}
     <div className="flex justify-end">
-      <div className="max-w-xs lg:max-w-md xl:max-w-lg">
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl rounded-br-md p-4 shadow-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <User className="w-4 h-4" />
-            <span className="text-xs opacity-80">You</span>
-          </div>
+      <div className="max-w-3xl">
+        <div className="bg-blue-600 text-white rounded-2xl rounded-br-md px-4 py-3 shadow-sm">
           <p className="text-sm leading-relaxed">{message.user}</p>
         </div>
       </div>
     </div>
     
-    {/* Chatbot message or typing animation */}
+    {/* Assistant message or typing animation */}
     {message.chatbot ? (
       <div className="flex justify-start">
-        <div className="max-w-xs lg:max-w-md xl:max-w-lg">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-2xl rounded-bl-md p-4 shadow-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <Bot className="w-4 h-4 text-blue-400" />
-              <span className="text-xs text-blue-400">AI Assistant</span>
-            </div>
-            <p className="text-sm leading-relaxed text-white/90">{message.chatbot}</p>
+        <div className="max-w-3xl">
+          <div className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.chatbot}</p>
           </div>
         </div>
       </div>
     ) : isLast && isTyping && (
       <div className="flex justify-start">
-        <div className="max-w-xs lg:max-w-md xl:max-w-lg">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-2xl rounded-bl-md p-4 shadow-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <Bot className="w-4 h-4 text-blue-400" />
-              <span className="text-xs text-blue-400">AI Assistant</span>
-            </div>
+        <div className="max-w-3xl">
+          <div className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
             <TypingAnimation />
           </div>
         </div>
@@ -221,13 +205,17 @@ const Ask = () => {
     }, 50);
   };
 
-  const getData = async (message, retryCount = 0) => {
+  const getData = async (message) => {
     if (!message || !user?.uid) return "No message provided or user not authenticated";
   
     try {
       // Add request timeout using AbortController
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds
+      const timeoutId = setTimeout(() => {
+        if (!controller.signal.aborted) {
+          controller.abort();
+        }
+      }, 30000); // 30 seconds
       
       const res = await fetch('https://bill-assistant-1.onrender.com/chat', {
         method: 'POST',
@@ -242,17 +230,11 @@ const Ask = () => {
       
       // Handle specific HTTP status codes
       if (res.status === 500) {
-        if (retryCount < 2) {
-          // Retry up to 2 times for server errors with exponential backoff
-          const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s delays
-          await new Promise(resolve => setTimeout(resolve, delay));
-          return getData(message, retryCount + 1);
-        }
-        return "🚫 **Server Error**: Our AI assistant is temporarily experiencing technical difficulties. This usually resolves within a few minutes. Please try again shortly, or contact support if the issue persists.";
+        return "🚫 **Server Error**: Finzi is temporarily experiencing technical difficulties. The AI service is currently unavailable. Please try again in a few minutes.";
       }
       
       if (res.status === 503) {
-        return "🔧 **Service Unavailable**: The AI service is temporarily down for maintenance. Please try again in a few minutes.";
+        return "🔧 **Service Unavailable**: Finzi is temporarily down for maintenance. Please try again in a few minutes.";
       }
       
       if (res.status === 429) {
@@ -260,7 +242,7 @@ const Ask = () => {
       }
       
       if (!res.ok) {
-        return `🚫 **Service Error** (${res.status}): The AI assistant is having trouble responding. Please try again or contact support if this continues.`;
+        return `🚫 **Service Error** (${res.status}): Finzi is having trouble responding. Please try again or contact support if this continues.`;
       }
   
       const text = await res.text();
@@ -270,7 +252,7 @@ const Ask = () => {
         if (json.success) {
           return json.response;
         } else {
-          return `🤖 **AI Assistant**: ${json.error || "I'm having trouble processing your request. Please try rephrasing your question or try again."}`;
+          return `🤖 **Finzi**: ${json.error || "I'm having trouble processing your request. Please try rephrasing your question or try again."}`;
         }
       } catch (jsonErr) {
         console.error('JSON parsing error:', jsonErr);
@@ -281,11 +263,12 @@ const Ask = () => {
       console.error('Fetch error:', fetchErr);
       
       if (fetchErr.name === 'AbortError') {
-        return "⏱️ **Request Timeout**: The request took too long to complete. Please check your connection and try again.";
+        // Don't show error message for aborted requests (user navigated away or new request started)
+        return null;
       }
       
       if (fetchErr.name === 'TypeError' && fetchErr.message.includes('Failed to fetch')) {
-        return "🌐 **Connection Error**: Unable to reach the AI service. Please check your internet connection and try again.";
+        return "🌐 **Connection Error**: Unable to reach Finzi. Please check your internet connection and try again.";
       }
       
       if (fetchErr.message.includes('ERR_BLOCKED_BY_CLIENT')) {
@@ -321,15 +304,24 @@ const Ask = () => {
       // Step 4: Fetch API response
       const response = await getData(trimmedMessage);
 
-      // Step 5: Update the message with bot response
-      const updatedMessage = { ...userMessage, chatbot: response };
-      const updatedChats = [...newChats.slice(0, -1), updatedMessage];
-      
-      // Update both chats and allChats atomically to prevent flicker
-      setChats(updatedChats);
-      const finalAllChats = [...updatedAllChats];
-      finalAllChats[currentChatIndex] = updatedChats;
-      setAllChats(finalAllChats);
+      // Step 5: Update the message with bot response (only if response is not null)
+      if (response !== null) {
+        const updatedMessage = { ...userMessage, chatbot: response };
+        const updatedChats = [...newChats.slice(0, -1), updatedMessage];
+        
+        // Update both chats and allChats atomically to prevent flicker
+        setChats(updatedChats);
+        const finalAllChats = [...updatedAllChats];
+        finalAllChats[currentChatIndex] = updatedChats;
+        setAllChats(finalAllChats);
+      } else {
+        // If response is null (aborted), remove the user message
+        const updatedChats = newChats.slice(0, -1);
+        setChats(updatedChats);
+        const finalAllChats = [...updatedAllChats];
+        finalAllChats[currentChatIndex] = updatedChats;
+        setAllChats(finalAllChats);
+      }
       
     } catch (error) {
       console.error("Error getting response:", error);
@@ -402,12 +394,12 @@ console.log(allChats)
   // Show loading screen while checking authentication
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <Bot className="w-8 h-8 text-white" />
+          <div className="w-16 h-16 bg-gray-900 dark:bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <Bot className="w-8 h-8 text-white dark:text-gray-900" />
           </div>
-          <p className="text-white/70 text-lg">Loading chat...</p>
+          <p className="text-gray-600 dark:text-gray-400 text-lg">Loading chat...</p>
         </div>
       </div>
     );
@@ -416,15 +408,15 @@ console.log(allChats)
   // Redirect to login if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Bot className="w-8 h-8 text-white" />
+          <div className="w-16 h-16 bg-gray-900 dark:bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Bot className="w-8 h-8 text-white dark:text-gray-900" />
           </div>
-          <p className="text-white/70 text-lg mb-4">Please log in to access the chat</p>
+          <p className="text-gray-600 dark:text-gray-400 text-lg mb-4">Please log in to access the chat</p>
           <button 
             onClick={() => window.location.href = '/login'}
-            className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
+            className="bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200 text-white dark:text-gray-900 px-6 py-3 rounded-lg font-medium transition-all duration-300"
           >
             Go to Login
           </button>
@@ -434,23 +426,23 @@ console.log(allChats)
   }
 
   return (
-    <div ref={containerRef} className="min-h-screen">
+    <div ref={containerRef} className="min-h-screen bg-white dark:bg-gray-900">
       <ChatBackground />
-      <div className="min-h-screen relative z-10 text-white flex flex-col lg:flex-row">
+      <div className="min-h-screen relative z-10 text-gray-900 dark:text-gray-100 flex flex-col lg:flex-row">
         {/* Sidebar */}
-        <div className={`fixed inset-y-0 left-0 z-50 w-80 bg-black/90 backdrop-blur-xl border-r border-white/10 transform transition-transform duration-300 ease-in-out ${
+        <div className={`fixed inset-y-0 left-0 z-50 w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0 lg:static lg:inset-0 lg:flex-shrink-0`}>
           <div className="flex flex-col h-full">
             {/* Sidebar Header */}
-            <div className="flex items-center justify-between p-6 border-b border-white/10">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <MessageSquare className="w-6 h-6 text-blue-400" />
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 Chat History
               </h2>
               <button
                 onClick={toggleSidebar}
-                className="lg:hidden text-white/60 hover:text-white bg-white/10 hover:bg-white/20 w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-300"
+                className="lg:hidden text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-300"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -460,7 +452,7 @@ console.log(allChats)
             <div className="p-4">
               <button
                 onClick={startNewChat}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-3 px-4 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
+                className="w-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-sm"
               >
                 <Plus className="w-5 h-5" />
                 New Chat
@@ -475,20 +467,20 @@ console.log(allChats)
                     <div
                       key={index}
                       onClick={() => switchToChat(index)}
-                      className={`p-4 rounded-xl cursor-pointer transition-all duration-300 ${
+                      className={`p-3 rounded-lg cursor-pointer transition-all duration-300 ${
                         index === currentChatIndex 
-                          ? 'bg-white/20 border border-white/20' 
-                          : 'bg-white/5 hover:bg-white/10 border border-transparent'
+                          ? 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600' 
+                          : 'bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700 border border-transparent'
                       }`}
                     >
-                      <div className="flex items-center gap-3 mb-2">
-                        <Clock className="w-4 h-4 text-white/60" />
-                        <span className="text-xs text-white/60 bg-white/10 px-2 py-1 rounded-full">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="w-3 h-3 text-gray-500 dark:text-gray-400" />
+                        <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded-full">
                           {new Date(chat.timestamp).toLocaleDateString()}
                         </span>
                       </div>
                       {chat.chat[0]?.user && (
-                        <p className="text-white/80 text-sm line-clamp-2">
+                        <p className="text-gray-700 dark:text-gray-300 text-sm line-clamp-2">
                           {chat.chat[0].user.substring(0, 60)}...
                         </p>
                       )}
@@ -497,9 +489,9 @@ console.log(allChats)
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <MessageSquare className="w-12 h-12 text-white/40 mx-auto mb-3" />
-                  <p className="text-white/60 text-sm">No chat history yet</p>
-                  <p className="text-white/40 text-xs mt-1">Start a conversation to see your chats here</p>
+                  <MessageSquare className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">No chat history yet</p>
+                  <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Start a conversation to see your chats here</p>
                 </div>
               )}
             </div>
@@ -509,7 +501,7 @@ console.log(allChats)
         {/* Overlay for mobile sidebar */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
             onClick={toggleSidebar}
           />
         )}
@@ -517,22 +509,22 @@ console.log(allChats)
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col min-h-screen lg:min-h-0">
           {/* Chat Header */}
-          <div className="chat-header bg-black/90 backdrop-blur-xl border-b border-white/10 p-4 flex items-center justify-between flex-shrink-0">
+          <div className="chat-header bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
               <button
                 onClick={toggleSidebar}
-                className="lg:hidden text-white/60 hover:text-white bg-white/10 hover:bg-white/20 w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300"
+                className="lg:hidden text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-300"
               >
                 <Menu className="w-5 h-5" />
               </button>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                  <Bot className="w-6 h-6 text-white" />
+                <div className="w-8 h-8 bg-gray-900 dark:bg-gray-100 rounded-lg flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-white dark:text-gray-900" />
                 </div>
                 <div>
-                  <h1 className="text-white font-semibold">AI Financial Assistant</h1>
-                  <div className="flex items-center gap-1 text-green-400 text-xs">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <h1 className="text-gray-900 dark:text-gray-100 font-semibold text-lg">Finzi</h1>
+                  <div className="flex items-center gap-1 text-green-600 dark:text-green-400 text-xs">
+                    <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
                     Online
                   </div>
                 </div>
@@ -540,7 +532,7 @@ console.log(allChats)
             </div>
             <button
               onClick={saveChats}
-              className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2"
+              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2"
             >
               <Sparkles className="w-4 h-4" />
               Save Chat
@@ -548,21 +540,39 @@ console.log(allChats)
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-32 lg:pb-4" ref={chatContainerRef} style={{ minHeight: 'calc(100vh - 200px)' }}>
+          <div className="flex-1 overflow-y-auto px-4 py-6 pb-32 lg:pb-6" ref={chatContainerRef} style={{ minHeight: 'calc(100vh - 200px)' }}>
             {chats.length === 0 ? (
               <div className="flex-1 flex items-center justify-center">
-                <div className="text-center max-w-md mx-auto">
-                  <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <Zap className="w-10 h-10 text-white" />
+                <div className="text-center max-w-2xl mx-auto">
+                  <div className="w-16 h-16 bg-gray-900 dark:bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <Bot className="w-8 h-8 text-white dark:text-gray-900" />
                   </div>
-                  <h2 className="text-3xl font-bold text-white mb-4">Hey there! 👋</h2>
-                  <p className="text-white/70 text-lg mb-8">
-                    Ask me anything about your finances — I'm here to help you track, analyze, and optimize your spending!
+                  <h2 className="text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-4">How can I help you today?</h2>
+                  <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 leading-relaxed">
+                    I'm Finzi, your AI financial assistant. I can help you analyze your spending, create budgets, track expenses, and provide insights to optimize your financial health.
                   </p>
+                  <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-left">
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2 text-sm">Budget Planning</h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">Create and manage budgets</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-left">
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2 text-sm">Expense Analysis</h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">Analyze spending patterns</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-left">
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2 text-sm">Financial Goals</h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">Set and track objectives</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-left">
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2 text-sm">Savings Tips</h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">Get saving recommendations</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="max-w-4xl mx-auto">
                 {chats.map((message, index) => (
                   <MessagePair
                     key={`${index}-${message.user}`}
@@ -577,30 +587,45 @@ console.log(allChats)
           </div>
 
           {/* Input Area */}
-          <div className="input-area p-4 lg:p-6 bg-black/50 backdrop-blur-xl border-t border-white/10 pb-24 lg:pb-6 fixed bottom-0 left-0 right-0 lg:relative lg:bottom-auto z-30 lg:z-auto">
+          <div className="input-area bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 lg:p-6 pb-24 lg:pb-6 fixed bottom-0 left-0 right-0 lg:relative lg:bottom-auto z-30 lg:z-auto">
             <div className="max-w-4xl mx-auto lg:ml-0">
               <div className="relative">
-                <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Ask about your spending, budget, or financial goals..."
-                  className="w-full bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 lg:py-5 px-6 lg:px-8 pr-16 lg:pr-20 text-white placeholder-white/50 focus:outline-none focus:border-blue-500 focus:bg-white/15 hover:bg-white/12 transition-all duration-300 text-base lg:text-lg shadow-lg focus:shadow-blue-500/20"
-                />
-                <button
-                  onClick={handleSendMessage}
-                  disabled={!inputValue.trim()}
-                  className="absolute right-2 lg:right-3 top-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 text-white w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center transition-all duration-300 disabled:cursor-not-allowed shadow-lg hover:shadow-blue-500/25 hover:scale-105 active:scale-95"
-                >
-                  <Send className="w-5 h-5 lg:w-6 lg:h-6" />
-                </button>
+                <div className="flex items-end bg-gray-100 dark:bg-gray-700 rounded-2xl border border-gray-200 dark:border-gray-600 shadow-sm focus-within:border-gray-400 dark:focus-within:border-gray-500 transition-colors">
+                  <textarea
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    placeholder="Message Finzi..."
+                    rows={1}
+                    className="flex-1 bg-transparent border-0 resize-none py-4 px-4 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none text-base leading-6 max-h-32"
+                    style={{
+                      minHeight: '24px',
+                      height: 'auto',
+                    }}
+                    onInput={(e) => {
+                      e.target.style.height = 'auto';
+                      e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px';
+                    }}
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={!inputValue.trim()}
+                    className="m-2 bg-gray-900 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white disabled:text-gray-500 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 disabled:cursor-not-allowed"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
               
               {/* Desktop: Add helpful text */}
               <div className="hidden lg:block mt-3 text-center">
-                <p className="text-white/40 text-sm">
-                  Press Enter to send • Powered by AI Financial Assistant
+                <p className="text-gray-500 dark:text-gray-400 text-xs">
+                  Press Enter to send • Shift+Enter for new line
                 </p>
               </div>
             </div>
